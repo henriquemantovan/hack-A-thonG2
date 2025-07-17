@@ -1,78 +1,45 @@
-import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
 import { toNano } from '@ton/core';
-import { SimpleCounter } from '../build/SimpleCounter/SimpleCounter_SimpleCounter';
-import '@ton/test-utils';
+import { NetworkProvider, sleep } from '@ton/blueprint';
+import { Store } from '../contracts/store';
 
-describe('SimpleCounter', () => {
-    let blockchain: Blockchain;
-    let deployer: SandboxContract<TreasuryContract>;
-    let simpleCounter: SandboxContract<SimpleCounter>;
+export async function run(provider: NetworkProvider) {
+  const deployer = provider.sender(); // Usuário dono do deploy
+  const userA = provider.openWallet(); // Vendedor A
+  const userB = provider.openWallet(); // Vendedor B
 
-    beforeEach(async () => {
-        blockchain = await Blockchain.create();
+  // 💡 Cria a loja com deployer como owner (não é mais relevante com seller por produto)
+  const store = provider.open(await Store.fromInit(deployer.address));
 
-        simpleCounter = blockchain.openContract(await SimpleCounter.fromInit(0n, 0n));
+  console.log('🚀 Deploying store...');
+  await store.sendDeploy(deployer, toNano('0.05'));
+  await sleep(1);
 
-        deployer = await blockchain.treasury('deployer');
+  // ✅ UserA adiciona um produto
+  console.log('🛒 UserA adiciona produto ID 1');
+  await store.send(userA, {
+    value: toNano('0.05'),
+    body: store.add_product(1n, 1000n, 10n),
+  });
 
-        const deployResult = await simpleCounter.send(
-            deployer.getSender(),
-            {
-                value: toNano('0.05'),
-            },
-            null,
-        );
-
-        expect(deployResult.transactions).toHaveTransaction({
-            from: deployer.address,
-            to: simpleCounter.address,
-            deploy: true,
-            success: true,
-        });
+  // ✅ UserB tenta remover -> deve falhar
+  console.log('❌ UserB tenta remover produto (espera-se erro)');
+  try {
+    await store.send(userB, {
+      value: toNano('0.01'),
+      body: store.remove_product(1n),
     });
+  } catch (e) {
+    console.log('✅ Falhou como esperado:', e.message);
+  }
 
-    it('should deploy', async () => {
-        // the check is done inside beforeEach
-        // blockchain and simpleCounter are ready to use
-    });
+  // ✅ UserA remove com sucesso
+  console.log('🧹 UserA remove produto');
+  await store.send(userA, {
+    value: toNano('0.01'),
+    body: store.remove_product(1n),
+  });
 
-    it('should increase counter', async () => {
-        const increaseTimes = 3;
-        for (let i = 0; i < increaseTimes; i++) {
-            console.log(`increase ${i + 1}/${increaseTimes}`);
-
-            const increaser = await blockchain.treasury('increaser' + i);
-
-            const counterBefore = await simpleCounter.getCounter();
-
-            console.log('counter before increasing', counterBefore);
-
-            const increaseBy = BigInt(Math.floor(Math.random() * 100));
-
-            console.log('increasing by', increaseBy);
-
-            const increaseResult = await simpleCounter.send(
-                increaser.getSender(),
-                {
-                    value: toNano('0.05'),
-                },
-                {
-                    $$type: 'Add',
-                    amount: increaseBy,
-                }
-            );
-
-            expect(increaseResult.transactions).toHaveTransaction({
-                from: increaser.address,
-                to: simpleCounter.address,
-                success: true,
-            });
-
-            const counterAfter = await simpleCounter.getCounter();
-
-            console.log('counter after increasing', counterAfter);
-
-            expect(counterAfter).toBe(counterBefore + increaseBy);
-        }
-    });
-});
+  // 🔍 Verifica se foi removido mesmo
+  const product = await store.get_product(1n);
+  console.log('📦 Produto após remoção:', product); // Deve ser null/undefined
+}

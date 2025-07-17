@@ -6,7 +6,7 @@
       "path": "contracts/simple_counter.tact",
       "output": "build/SimpleCounter",
       "options": {
-        "debug": false,
+        "debug": true,
         "external": false
       },
       "mode": "full"
