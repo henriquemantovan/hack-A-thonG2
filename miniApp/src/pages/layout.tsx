@@ -4,10 +4,6 @@ import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: '[HACK-A-THON] MiniApp',
-  description: 'MiniApp do vendedor',
-};
 
 export default function RootLayout({
   children,
