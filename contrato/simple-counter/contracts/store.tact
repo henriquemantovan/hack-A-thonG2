@@ -1,3 +1,9 @@
+struct Product {
+  price: Int;
+  amount: Int;
+  seller: Address;
+}
+//NO CASO O ID EH O LUGAR DA LISTA
 contract Store {
   owner: Address;
   products: map<Int, Product>;
@@ -8,27 +14,26 @@ contract Store {
   }
 
   public fn add_product(id: Int, price: Int, amount: Int) {
-    require(msg.sender == this.owner, "Only owner");
-    this.products.set(id, Product(price, amount));
+    this.products.set(id, Product(price, amount, msg.sender));
   }
 
   public fn change_price(id: Int, new_price: Int) {
-    require(msg.sender == this.owner, "Only owner");
     let product = this.products.get(id).expect("Not found");
-    this.products.set(id, Product(new_price, product.amount));
+    require(msg.sender == product.seller, "Only seller");
+    this.products.set(id, Product(new_price, product.amount, product.seller));
   }
 
   public fn change_amount(id: Int, new_amount: Int) {
-    require(msg.sender == this.owner, "Only owner");
     let product = this.products.get(id).expect("Not found");
-    this.products.set(id, Product(product.price, new_amount));
+    require(msg.sender == product.seller, "Only seller");
+    this.products.set(id, Product(product.price, new_amount, product.seller));
   }
 
   public fn remove_product(id: Int) {
-    require(msg.sender == this.owner, "Only owner");
+    let product = this.products.get(id).expect("Not found");
+    require(msg.sender == product.seller, "Only seller");
     this.products.delete(id);
   }
-
 
   get fn get_product(id: Int): Product? {
     return this.products.get(id);
