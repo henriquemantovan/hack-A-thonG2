@@ -45,7 +45,6 @@ const GerenciarLoja = () => {
         <button onClick={() => router.back()} className="hover:underline mr-4">
           ← Voltar
         </button>
-        <h1 className="text-xl font-bold font-mono">Produtos da Loja</h1>
       </header>
 
       <main className="flex flex-col items-center flex-1 px-4 py-8">
