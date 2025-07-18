@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Button from '../components/Button';
 import { useRouter } from 'next/router';
 import { TelegramWebApp } from '../utils/telegram';
@@ -13,6 +13,12 @@ declare global {
 
 const Home = () => {
   const router = useRouter();
+
+  useEffect(() => {
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.expand();
+    }
+  }, []);
 
   const handleButtonClick1 = () => {
     router.push('/novoproduto');
