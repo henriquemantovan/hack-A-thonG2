@@ -1,36 +1,35 @@
-message Add {
-    amount: Int as uint32;
+import "@stdlib/deploy";
+
+struct Item {
+    price: int as uint32;
+    quantity: int as uint32;
+    owner: address;
 }
 
-contract SimpleCounter(
-    // Persistent state variables declared via the
-    // contract parameters syntax, which was introduced in v1.6.0
-    //
-    // See: https://docs.tact-lang.org/book/contracts/#parameters
-    id: Int as uint32,
-    counter: Int as uint32,
-) {
-    // Empty receiver for the deployment,
-    // which expects the `null` message body
-    receive() {
-        // Forward the remaining value in the
-        // incoming message back to the sender
-        cashback(sender());
+message AddItem
+{
+    item: Item;
+}
+
+message GetPrice {
+    queryId: Int as uint64;
+    name: String;
+}
+
+contract TactStore with Deployable {
+    storeId: Int as uint32;
+    items: map<Int id as uint32, Item>;
+    idItter: Int as uint32;
+
+    init(storeId: Int) {
+        self.storeId = storeId;
+        self.items = map();
+        self.idItter = 0;
     }
 
-    receive(msg: Add) {
-        self.counter += msg.amount;
-
-        // Forward the remaining value in the
-        // incoming message back to the sender
-        cashback(sender());
+    receive AddItem(msg: AddItem){
+        self.items.set(self.idItter, msg.item);
+        self.idItter += 1;
     }
 
-    get fun counter(): Int {
-        return self.counter;
-    }
-
-    get fun id(): Int {
-        return self.id;
-    }
 }
