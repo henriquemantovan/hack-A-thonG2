@@ -1,4 +1,7 @@
 import "@stdlib/deploy";
+//https://docs.tact-lang.org/book/compile/
+//https://docs.tact-lang.org/ref/evolution/otp-002/
+//https://docs.ton.org/v3/guidelines/ton-connect/frameworks/react
 
 struct Item {
     price: Int as uint32;
