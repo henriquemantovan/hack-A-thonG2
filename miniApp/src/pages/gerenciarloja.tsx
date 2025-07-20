@@ -1,3 +1,4 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
@@ -7,66 +8,124 @@ const GerenciarLoja = () => {
 
   useEffect(() => {
     const fetchProdutos = async () => {
-      const res = await fetch("/api/products");
-      const data = await res.json();
-      console.log(data); // para garantir o formato
-      setProdutos(data);
+      try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        console.log(data);
+        setProdutos(data);
+      } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+      }
     };
 
     fetchProdutos();
   }, []);
 
+  const handleGoBack = () => {
+    router.back();
+  };
+
+  const handleEdit = (produto: any) => {
+    // TODO: implementar edição
+    console.log('Editar:', produto);
+  };
+
+  const handleDelete = (produto: any) => {
+    // TODO: implementar exclusão
+    console.log('Excluir:', produto);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-purple-200 flex flex-col">
-      <header className="bg-blue-500 text-white px-4 py-3 shadow-md flex items-center">
-        <button onClick={() => router.back()} className="hover:underline mr-4">
-          ← Voltar
-        </button>
+    <div className="min-h-screen" style={{ background: '#feebb3' }}>
+      <header className="relative">
+        <div className="bg-gradient-to-b from-red-500 to-red-600 h-16 relative overflow-hidden shadow-lg">
+          <div className="absolute inset-0 flex">
+            {[...Array(12)].map((_, i) => (
+              <div
+                key={i}
+                className={`flex-1 ${i % 2 === 0 ? '#f2402e' : 'bg-white'}`}
+              />
+            ))}
+          </div>
+          <div className="relative z-10 flex items-center h-full px-6">
+            <button
+              onClick={handleGoBack}
+              className="bg-white bg-opacity-90 hover:bg-opacity-100 text-red-600 font-bold py-2 px-4 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
+            >
+              <span>←</span>
+              <span>Voltar</span>
+            </button>
+          </div>
+        </div>
+        <div className="h-3 bg-gradient-to-b from-red-700 to-red-800" />
       </header>
 
-      <main className="flex flex-col items-center flex-1 px-4 py-8">
-        <div className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-2 gap-8">
-          {produtos.map((produto) => {
-            // converte o preço para número
-            const precoNumero = Number(produto.price);
+      <main className="px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-5xl font-bold mb-2 font-serif" style={{ color: '#5d412c' }}>
+              Estoque da loja
+            </h2>
+            <p className="text-amber-700 bg-white bg-opacity-60 rounded-lg p-2 inline-block shadow-inner" style={{ color: '#5d412c' }}>
+              Edite e exclua os produtos disponíveis na sua loja.
+            </p>
+          </div>
 
-            return (
-              <div key={produto.id} className="bg-white rounded-2xl shadow-xl p-6 flex flex-col items-center">
-                <img
-                  src={produto.photo.startsWith('http') ? produto.photo : `/uploads/${produto.photo}`}
-                  alt={produto.name}
-                  className="w-full h-40 object-cover rounded-lg mb-4 border"
-                />
-                <h2 className="text-lg font-bold text-gray-800 mb-2">{produto.name}</h2>
-                <p className="text-gray-600 mb-1">
-                  Categoria: <span className="font-semibold">{produto.category}</span>
-                </p>
-                <p className="text-gray-600 mb-1">
-                  Preço:{' '}
-                  <span className="font-semibold">
-                    {isNaN(precoNumero) ? '0.00' : precoNumero.toFixed(2)}
-                  </span>
-                </p>
-                <p className="text-gray-600 mb-3">
-                  Quantidade: <span className="font-semibold">{produto.quant}</span>
-                </p>
-                <div className="flex gap-2">
-                  <button className="bg-yellow-400 text-white px-4 py-2 rounded-lg hover:bg-yellow-500 transition">
-                    Editar
-                  </button>
-                  <button className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
-                    Excluir
-                  </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {produtos.map((produto) => {
+              const precoNumero = Number(produto.price);
+              const imagem = produto.photo?.startsWith('http')
+                ? produto.photo
+                : `/uploads/${produto.photo}`;
+
+              return (
+                <div key={produto.id} className="relative group">
+                  <div className="absolute -inset-2 bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl group-hover:rotate-1 transition-transform duration-350" />
+                  <div className="relative bg-white rounded-2xl shadow-xl p-6 transform group-hover:scale-104 transition-all duration-350">
+                    <div className="absolute -top-3 -right-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg" style={{ background: '#0d97ac' }}>
+                      {produto.category}
+                    </div>
+                    <div className="relative mb-4">
+                      <img
+                        src={imagem}
+                        alt={produto.name}
+                        className="w-full h-40 object-cover rounded-xl border-4 border-amber-200 shadow-inner"
+                      />
+                    </div>
+                    <div className="text-center mb-4">
+                      <h3 className="text-lg font-bold text-gray-800 mb-2">{produto.name}</h3>
+                      <div className="bg-amber-100 rounded-lg p-3 mb-3">
+                        <p className="text-2xl font-bold text-green-600 mb-1">
+                          R$ {isNaN(precoNumero) ? '0.00' : precoNumero.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Estoque: <span className="font-semibold">{produto.quant} unidades</span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEdit(produto)}
+                        className="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 border-2 border-yellow-600 hover:border-yellow-700 flex items-center justify-center space-x-2"
+                      >
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(produto)}
+                        className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 border-2 border-red-700 hover:border-red-800 flex items-center justify-center space-x-2"
+                      >
+                        <span>Excluir</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-
+              );
+            })}
+          </div>
         </div>
       </main>
     </div>
   );
 };
-
 
 export default GerenciarLoja;
