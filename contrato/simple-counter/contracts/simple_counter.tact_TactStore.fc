@@ -1,0 +1,642 @@
+#pragma version =0.4.6;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+;; simple_counter.tact_TactStore.headers.fc
+;;
+;; Header files for TactStore
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; __tact_context_get_sender
+slice __tact_context_get_sender() inline;
+
+;; __tact_dict_get_uint_cell
+cell __tact_dict_get_uint_cell(cell d, int kl, int k) inline;
+
+;; __tact_dict_set_uint_cell
+(cell, ()) __tact_dict_set_uint_cell(cell d, int kl, int k, cell v) inline;
+
+;; $DeployOk$_store
+builder $DeployOk$_store(builder build_0, (int) v) inline;
+
+;; $DeployOk$_store_cell
+cell $DeployOk$_store_cell((int) v, builder b) inline;
+
+;; $Item$_store
+builder $Item$_store(builder build_0, (int, int, slice) v) inline;
+
+;; $Item$_store_cell
+cell $Item$_store_cell((int, int, slice) v, builder b) inline;
+
+;; $Item$_load
+(slice, ((int, int, slice))) $Item$_load(slice sc_0) inline;
+
+;; $Item$_as_optional
+tuple $Item$_as_optional((int, int, slice) v) inline;
+
+;; $Item$_load_opt
+tuple $Item$_load_opt(cell cl) inline;
+
+;; $TactStore$_store
+builder $TactStore$_store(builder build_0, (int, cell, int) v) inline;
+
+;; $TactStore$_load
+(slice, ((int, cell, int))) $TactStore$_load(slice sc_0) inline;
+
+;; $Context$_get_value
+_ $Context$_get_value((int, slice, int, slice) v) inline;
+
+;; $Item$_not_null
+((int, int, slice)) $Item$_not_null(tuple v) inline;
+
+;; $Item$_to_tuple
+tuple $Item$_to_tuple(((int, int, slice)) v) inline;
+
+;; $Item$_to_opt_tuple
+tuple $Item$_to_opt_tuple(tuple v) inline;
+
+;; $Item$_to_opt_external
+tuple $Item$_to_opt_external(tuple v) inline;
+
+;; $TactStore$init$_load
+(slice, ((int))) $TactStore$init$_load(slice sc_0) inline;
+
+;; $TactStore$_contract_init
+(int, cell, int) $TactStore$_contract_init(int $storeId) impure inline;
+
+;; $TactStore$_contract_load
+(int, cell, int) $TactStore$_contract_load() impure inline;
+
+;; $TactStore$_contract_store
+() $TactStore$_contract_store((int, cell, int) v) impure inline;
+
+;; $TactStore$_fun_get_store_id
+((int, cell, int), int) $TactStore$_fun_get_store_id((int, cell, int) $self) impure inline_ref;
+
+;; $TactStore$_fun_get_item
+((int, cell, int), tuple) $TactStore$_fun_get_item((int, cell, int) $self, int $id) impure inline_ref;
+
+;; $TactStore$_fun_get_item_count
+((int, cell, int), int) $TactStore$_fun_get_item_count((int, cell, int) $self) impure inline_ref;
+
+;; $MessageParameters$_constructor_bounce_to_value_mode_body
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
+
+;; $TactStore$_fun_notify
+((int, cell, int), ()) $TactStore$_fun_notify((int, cell, int) $self, cell $body) impure inline;
+
+;; $Item$_constructor_price_quantity_owner
+((int, int, slice)) $Item$_constructor_price_quantity_owner(int $price, int $quantity, slice $owner) inline;
+
+;; $SendParameters$_constructor_to_value
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value(slice $to, int $value) inline;
+
+;; $DeployOk$_constructor_queryId
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
+
+
+;; simple_counter.tact_TactStore.stdlib.fc
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_child_contract_codes;
+global int __tact_randomized;
+
+(cell, int) __tact_dict_delete_uint(cell dict, int key_len, int index) asm(index dict key_len) """
+    DICTUDEL
+""";
+
+(int, slice, int, slice) __tact_context_get() inline {
+    return __tact_context;
+}
+
+slice __tact_context_get_sender() inline {
+    return __tact_context_sender;
+}
+
+forall X0, X1, X2 -> tuple __tact_tuple_create_3((X0, X1, X2) v) asm """
+    3 TUPLE
+""";
+
+forall X0, X1, X2 -> (X0, X1, X2) __tact_tuple_destroy_3(tuple v) asm """
+    3 UNTUPLE
+""";
+
+cell __tact_dict_get_uint_cell(cell d, int kl, int k) inline {
+    var (r, ok) = udict_get_ref?(d, kl, k);
+    if (ok) {
+        return r;
+    } else {
+        return null();
+    }
+}
+
+(cell, ()) __tact_dict_set_uint_cell(cell d, int kl, int k, cell v) inline {
+    if (null?(v)) {
+        var (r, ok) = udict_delete?(d, kl, k);
+        return (r, ());
+    } else {
+        return (udict_set_ref(d, kl, k, v), ());
+    }
+}
+
+int $global_myBalance() impure asm """
+    BALANCE FIRST
+""";
+
+() $global_nativeReserve(int $amount, int $mode) impure asm """
+    RAWRESERVE
+""";
+
+() $global_message((int, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+    STZEROES
+    // → Stack state
+    // s0: Builder
+    // s1: `body`
+    // s2: `mode`
+    STDICT
+    ENDC
+    SWAP
+    SENDRAWMSG
+""";
+
+() $global_send((int, cell, cell, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+    STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+    // → Stack state
+    // s0: Builder
+    // s1: `data`
+    // s2: `code`
+    // s3: `body`
+    // s4: `mode`
+
+    // Group 2: Placing the Builder after code and data, then checking those for nullability
+    s2 XCHG0
+    DUP2
+    ISNULL
+    SWAP
+    ISNULL
+    AND
+    // → Stack state
+    // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+    // s1: `code`
+    // s2: `data`
+    // s3: Builder
+    // s4: `body`
+    // s5: `mode`
+
+    // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+    <{
+        DROP2 // drop `data` and `code`, since either of those is null
+        b{0} STSLICECONST
+    }> PUSHCONT
+
+    // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+    <{
+        // _ split_depth:(Maybe (## 5))
+        //   special:(Maybe TickTock)
+        //   code:(Maybe ^Cell)
+        //   data:(Maybe ^Cell)
+        //   library:(Maybe ^Cell)
+        // = StateInit;
+        ROT                // place message Builder on top
+        b{10} STSLICECONST // store Maybe = true, Either = false
+        // Start composing inlined StateInit
+        b{00} STSLICECONST // store split_depth and special first
+        STDICT             // store code
+        STDICT             // store data
+        b{0} STSLICECONST  // store library
+    }> PUSHCONT
+
+    // Group 3: IFELSE that does the branching shown above
+    IFELSE
+    // → Stack state
+    // s0: Builder
+    // s1: null or StateInit
+    // s2: `body`
+    // s3: `mode`
+
+    // Group 4: Finalizing the message
+    STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
+    ENDC
+    // → Stack state
+    // s0: Cell
+    // s1: `mode`
+
+    // Group 5: Sending the message, with `mode` on top
+    SWAP
+    SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+""";
+
+((int, cell, int), ()) $TactStore$_fun_notify((int, cell, int) $self, cell $body) impure inline {
+    var (($self'storeId, $self'items, $self'idItter)) = $self;
+    slice $to = __tact_context_get_sender();
+    int $bounce = false;
+    if (false) {
+        int $balance = $global_myBalance();
+        int $balanceBeforeMessage = ($balance - $Context$_get_value(__tact_context_get()));
+        if (($balanceBeforeMessage < 0)) {
+            $global_nativeReserve(0, 0);
+            $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
+            return (($self'storeId, $self'items, $self'idItter), ());
+        }
+    }
+    $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
+    return (($self'storeId, $self'items, $self'idItter), ());
+}
+
+;; simple_counter.tact_TactStore.storage.fc
+;;
+;; Type: Context
+;; TLB: _ bounceable:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounceable, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell value:int257 to:address bounce:bool = SendParameters
+;;
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value(slice $to, int $value) inline {
+    return (0, null(), null(), null(), $value, $to, true);
+}
+
+;;
+;; Type: MessageParameters
+;; TLB: _ mode:int257 body:Maybe ^cell value:int257 to:address bounce:bool = MessageParameters
+;;
+
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, $value, $to, $bounce);
+}
+
+;;
+;; Type: DeployOk
+;; Header: 0xaff90f57
+;; TLB: deploy_ok#aff90f57 queryId:uint64 = DeployOk
+;;
+
+builder $DeployOk$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $DeployOk$_store_cell((int) v, builder b) inline {
+    return $DeployOk$_store(b, v).end_cell();
+}
+
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline {
+    return ($queryId);
+}
+
+;;
+;; Type: Item
+;; TLB: _ price:uint32 quantity:uint32 owner:address = Item
+;;
+
+builder $Item$_store(builder build_0, (int, int, slice) v) inline {
+    var (v'price, v'quantity, v'owner) = v;
+    build_0 = build_0.store_uint(v'price, 32);
+    build_0 = build_0.store_uint(v'quantity, 32);
+    build_0 = build_0.store_slice(v'owner);
+    return build_0;
+}
+
+cell $Item$_store_cell((int, int, slice) v, builder b) inline {
+    return $Item$_store(b, v).end_cell();
+}
+
+(slice, ((int, int, slice))) $Item$_load(slice sc_0) inline {
+    var v'price = sc_0~load_uint(32);
+    var v'quantity = sc_0~load_uint(32);
+    var v'owner = sc_0~load_msg_addr();
+    return (sc_0, (v'price, v'quantity, v'owner));
+}
+
+tuple $Item$_as_optional((int, int, slice) v) inline {
+    var (v'price, v'quantity, v'owner) = v;
+    return __tact_tuple_create_3(v'price, v'quantity, v'owner);
+}
+
+tuple $Item$_load_opt(cell cl) inline {
+    if (null?(cl)) {
+        return null();
+    }
+    var sc = cl.begin_parse();
+    return $Item$_as_optional(sc~$Item$_load());
+}
+
+((int, int, slice)) $Item$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (int vvv'price, int vvv'quantity, slice vvv'owner) = __tact_tuple_destroy_3(v);
+    return (vvv'price, vvv'quantity, vvv'owner);
+}
+
+tuple $Item$_to_tuple(((int, int, slice)) v) inline {
+    var (v'price, v'quantity, v'owner) = v;
+    return __tact_tuple_create_3(v'price, v'quantity, v'owner);
+}
+
+tuple $Item$_to_opt_tuple(tuple v) inline {
+    if (null?(v)) { return null(); } 
+    return $Item$_to_tuple($Item$_not_null(v)); 
+}
+
+tuple $Item$_to_opt_external(tuple v) inline {
+    var loaded = $Item$_to_opt_tuple(v);
+    if (null?(loaded)) {
+        return null();
+    } else {
+        return (loaded);
+    }
+}
+
+((int, int, slice)) $Item$_constructor_price_quantity_owner(int $price, int $quantity, slice $owner) inline {
+    return ($price, $quantity, $owner);
+}
+
+;;
+;; Type: TactStore
+;; TLB: _ storeId:uint32 items:dict<uint32, ^Item{price:uint32,quantity:uint32,owner:address}> idItter:uint32 = TactStore
+;;
+
+builder $TactStore$_store(builder build_0, (int, cell, int) v) inline {
+    var (v'storeId, v'items, v'idItter) = v;
+    build_0 = build_0.store_uint(v'storeId, 32);
+    build_0 = build_0.store_dict(v'items);
+    build_0 = build_0.store_uint(v'idItter, 32);
+    return build_0;
+}
+
+(slice, ((int, cell, int))) $TactStore$_load(slice sc_0) inline {
+    var v'storeId = sc_0~load_uint(32);
+    var v'items = sc_0~load_dict();
+    var v'idItter = sc_0~load_uint(32);
+    return (sc_0, (v'storeId, v'items, v'idItter));
+}
+
+(slice, ((int))) $TactStore$init$_load(slice sc_0) inline {
+    var v'storeId = sc_0~load_int(257);
+    return (sc_0, (v'storeId));
+}
+
+(int, cell, int) $TactStore$_contract_load() impure inline {
+    slice $sc = get_data().begin_parse();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$TactStore$_load();
+    }
+    else {
+        (int $storeId) = $sc~$TactStore$init$_load();
+        $sc.end_parse();
+        return $TactStore$_contract_init($storeId);
+    }
+}
+
+() $TactStore$_contract_store((int, cell, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_int(true, 1);
+    b = $TactStore$_store(b, v);
+    set_data(b.end_cell());
+}
+
+;;
+;; Contract TactStore functions
+;;
+
+(int, cell, int) $TactStore$_contract_init(int $storeId) impure inline {
+    var (($self'storeId, $self'items, $self'idItter)) = (null(), null(), null());
+    $self'storeId = $storeId;
+    $self'items = null();
+    $self'idItter = 0;
+    return ($self'storeId, $self'items, $self'idItter);
+}
+
+((int, cell, int), int) $TactStore$_fun_get_store_id((int, cell, int) $self) impure inline_ref {
+    var (($self'storeId, $self'items, $self'idItter)) = $self;
+    var $fresh$ret_0 = $self'storeId;
+    return (($self'storeId, $self'items, $self'idItter), $fresh$ret_0);
+}
+
+((int, cell, int), tuple) $TactStore$_fun_get_item((int, cell, int) $self, int $id) impure inline_ref {
+    var (($self'storeId, $self'items, $self'idItter)) = $self;
+    var $fresh$ret_1 = $Item$_load_opt(__tact_dict_get_uint_cell($self'items, 32, $id));
+    return (($self'storeId, $self'items, $self'idItter), $fresh$ret_1);
+}
+
+((int, cell, int), int) $TactStore$_fun_get_item_count((int, cell, int) $self) impure inline_ref {
+    var (($self'storeId, $self'items, $self'idItter)) = $self;
+    var $fresh$ret_2 = $self'idItter;
+    return (($self'storeId, $self'items, $self'idItter), $fresh$ret_2);
+}
+
+;;
+;; Get methods of a Contract TactStore
+;;
+
+_ %get_store_id() method_id(118517) {
+    var self = $TactStore$_contract_load();
+    var res = self~$TactStore$_fun_get_store_id();
+    return res;
+}
+
+_ %get_item(int $id) method_id(87122) {
+    int $id = $id;
+    var self = $TactStore$_contract_load();
+    var res = self~$TactStore$_fun_get_item($id);
+    return $Item$_to_opt_external(res);
+}
+
+_ %get_item_count() method_id(118255) {
+    var self = $TactStore$_contract_load();
+    var res = self~$TactStore$_fun_get_item_count();
+    return res;
+}
+
+;;
+;; Routing of a Contract TactStore
+;;
+
+;; message opcode reader utility: only binary receivers
+;; Returns 32 bit message opcode, otherwise throws the "Invalid incoming message" exit code
+(slice, int) ~load_opcode_internal(slice s) asm( -> 1 0) "32 LDUQ 130 THROWIFNOT";
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    cs~skip_bits(2);
+    var msg_bounceable = cs~load_int(1);
+    var msg_bounced = cs~load_int(1);
+    slice msg_sender_addr = cs~load_msg_addr();
+    __tact_context = (msg_bounceable, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var ($self'storeId, $self'items, $self'idItter) = $TactStore$_contract_load();
+    
+    ;; Handle bounced messages
+    if (msg_bounced) { return (); }
+    var op = in_msg~load_opcode_internal();
+    ;; Receive AddItem message
+    if (op == 774574933) {
+        var $msg'price = in_msg~load_uint(32);
+        var $msg'quantity = in_msg~load_uint(32);
+        var ($estrutura'price, $estrutura'quantity, $estrutura'owner) = $Item$_constructor_price_quantity_owner($msg'price, $msg'quantity, __tact_context_get_sender());
+        $self'items~__tact_dict_set_uint_cell(32, $self'idItter, $Item$_store_cell(($estrutura'price, $estrutura'quantity, $estrutura'owner), begin_cell()));
+        $self'idItter = $self'idItter + 1;
+        $TactStore$_contract_store(($self'storeId, $self'items, $self'idItter));
+        return ();
+    }
+    
+    ;; Receive RMItem message
+    if (op == 2314020298) {
+        var $msg'id = in_msg~load_uint(32);
+        tuple $itemOpt = $Item$_load_opt(__tact_dict_get_uint_cell($self'items, 32, $msg'id));
+        throw_unless(47106, (~ null?($itemOpt)));
+        var ($item'price, $item'quantity, $item'owner) = $Item$_not_null($itemOpt);
+        throw_unless(34360, ( equal_slices_bits($item'owner, __tact_context_get_sender()) ));
+        $self'items~__tact_dict_delete_uint(32, $msg'id);
+        $TactStore$_contract_store(($self'storeId, $self'items, $self'idItter));
+        return ();
+    }
+    
+    ;; Receive BuyItem message
+    if (op == 1872953326) {
+        var $msg'id = in_msg~load_uint(32);
+        tuple $itemOpt = $Item$_load_opt(__tact_dict_get_uint_cell($self'items, 32, $msg'id));
+        throw_unless(47106, (~ null?($itemOpt)));
+        var ($item'price, $item'quantity, $item'owner) = $Item$_not_null($itemOpt);
+        throw_unless(54969, ($item'quantity > 0));
+        var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+        throw_unless(48341, ($ctx'value >= $item'price));
+        $global_send($SendParameters$_constructor_to_value($item'owner, $ctx'value));
+        int $newQuantity = ($item'quantity - 1);
+        if (($newQuantity > 0)) {
+            var ($updatedItem'price, $updatedItem'quantity, $updatedItem'owner) = $Item$_constructor_price_quantity_owner($item'price, $newQuantity, $item'owner);
+            $self'items~__tact_dict_set_uint_cell(32, $msg'id, $Item$_store_cell(($updatedItem'price, $updatedItem'quantity, $updatedItem'owner), begin_cell()));
+        } else {
+            $self'items~__tact_dict_delete_uint(32, $msg'id);
+        }
+        $TactStore$_contract_store(($self'storeId, $self'items, $self'idItter));
+        return ();
+    }
+    
+    ;; Receive Deploy message
+    if (op == 0x946a98b6) {
+        var $deploy'queryId = in_msg~load_uint(64);
+        ($self'storeId, $self'items, $self'idItter)~$TactStore$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
+        $TactStore$_contract_store(($self'storeId, $self'items, $self'idItter));
+        return ();
+    }
+    
+    ;; Throw if not handled
+    throw(130);
+}
+
+
+() __tact_selector_hack_asm() impure asm """
+@atend @ 1 {
+        execute current@ context@ current!
+        {
+            // The core idea of this function is to save gas by avoiding unnecessary dict jump, when recv_internal/recv_external is called
+            // We want to extract recv_internal/recv_external from the dict and select needed function
+            // not by jumping to the needed function by it's index, but by using usual IF statements.
+
+            }END> b> // Close previous builder, now we have a cell of previous code on top of the stack
+
+            <{ // Start of the new code builder
+                SETCP0
+                // Swap the new code builder with the previous code, now we have previous code on top of the stack
+                swap
+                // Transform cell to slice and load first ref from the previous code, now we have the dict on top of the stack
+                <s ref@
+
+                // Extract the recv_internal from the dict
+                dup 0 swap @procdictkeylen idict@ { "internal shortcut error" abort } ifnot
+                swap
+
+                // Delete the recv_internal from the dict
+                0 swap @procdictkeylen idict- drop
+                // Delete the recv_external from the dict (it's okay if it's not there)
+                -1 swap @procdictkeylen idict- drop
+                // Delete the __tact_selector_hack from the dict
+                65535 swap @procdictkeylen idict- drop
+
+                // Bring the code builder from the bottom of the stack
+                // because if recv_external extraction is optional, and the number of elements on the stack is not fixed
+                depth 1- roll
+                // Swap with the dict from which we extracted recv_internal and (maybe) recv_external
+                swap
+
+                // Check if the dict is empty
+                dup null?
+                // Store a copy of this flag in the bottom of the stack
+                dup depth 1- -roll
+                {
+                    // If the dict is empty, just drop it (it will be null if it's empty)
+                    drop
+                }
+                {
+                    // If the dict is not empty, prepare continuation to be stored in c3
+                    <{
+                        // Save this dict as first ref in this continuation, it will be pushed in runtime by DICTPUSHCONST
+                        swap @procdictkeylen DICTPUSHCONST
+                        // Jump to the needed function by it's index
+                        DICTIGETJMPZ
+                        // If such key is not found, throw 11 along with the key as an argument
+                        11 THROWARG
+                    }> PUSHCONT
+                    // Store the continuation in c3
+                    c3 POP
+                } cond
+
+                // Function id is on top of the (runtime) stack
+                DUP IFNOTJMP:<{
+                    // place recv_internal here
+                    DROP swap @addop
+                }>
+
+                // Bring back the flag, indicating if the dict is empty or not from the bottom of the stack
+                depth 1- roll
+                {
+                    // If the dict is empty, throw 11
+                    11 THROWARG
+                }
+                {
+                    // If the dict is not empty, jump to continuation from c3
+                    c3 PUSH JMPX
+                } cond
+            }> b>
+        } : }END>c
+        current@ context! current!
+    } does @atend !
+""";
+
+() __tact_selector_hack() method_id(65535) {
+    return __tact_selector_hack_asm();
+}
