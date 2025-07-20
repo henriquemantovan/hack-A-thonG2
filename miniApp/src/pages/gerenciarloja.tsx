@@ -61,10 +61,12 @@ const GerenciarLoja = () => {
               </div>
             );
           })}
+
         </div>
       </main>
     </div>
   );
 };
+
 
 export default GerenciarLoja;
