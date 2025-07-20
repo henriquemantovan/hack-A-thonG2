@@ -11,15 +11,40 @@ const CadastrarProduto = () => {
   const [categoria, setCategoria] = useState('');
   const [imagem, setImagem] = useState<File | null>(null);
 
-  const handleCadastrar = () => {
-    if (!nome || !preco || !quant || !categoria) {
-      alert('Preencha todos os campos');
-      return;
+const handleCadastrar = async () => {
+  if (!nome || !preco || !quant || !categoria) {
+    alert('Preencha todos os campos');
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/products", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: nome,
+        price: parseFloat(preco.replace(',', '.')),
+        quant: parseInt(quant),
+        category: categoria,
+        photo: "imagem.png"  // você pode trocar depois para um caminho real
+      })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert("Produto cadastrado com sucesso!");
+      handleLimpar();
+    } else {
+      alert("Erro no servidor: " + (data.error || "Erro desconhecido"));
+      console.error("Erro do servidor:", data);
     }
-    console.log('Produto cadastrado:', { nome, preco, quant, categoria, imagem });
-    alert('Produto cadastrado com sucesso!');
-    handleLimpar();
-  };
+  } catch (err) {
+    alert("Erro ao cadastrar produto");
+    console.error(err);
+  }
+};
 
   const handleLimpar = () => {
     setNome('');
@@ -48,7 +73,7 @@ const CadastrarProduto = () => {
             placeholder="Nome do produto"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="text-gray-800 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
 
           <input
@@ -57,7 +82,7 @@ const CadastrarProduto = () => {
             placeholder="Preço"
             value={preco}
             onChange={(e) => setPreco(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="text-gray-800 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
 
           <input
@@ -66,7 +91,7 @@ const CadastrarProduto = () => {
             placeholder="Quantidade"
             value={quant}
             onChange={(e) => setQuant(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="text-gray-800 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
 
           <input
@@ -74,7 +99,7 @@ const CadastrarProduto = () => {
             placeholder="Categoria (ex: móveis, papelaria...)"
             value={categoria}
             onChange={(e) => setCategoria(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="text-gray-800 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
 
           <div className="w-full">
