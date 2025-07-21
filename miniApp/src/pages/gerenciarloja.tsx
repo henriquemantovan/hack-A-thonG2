@@ -138,7 +138,7 @@ const GerenciarLoja = () => {
                       <h3 className="text-lg font-bold text-gray-800 mb-2">{produto.name}</h3>
                       <div className="bg-amber-100 rounded-lg p-3 mb-3">
                         <p className="text-2xl font-bold text-green-600 mb-1">
-                          R$ {isNaN(precoNumero) ? '0.00' : precoNumero.toFixed(2)}
+                          {isNaN(precoNumero) ? '0.00' : precoNumero.toFixed(2)}
                         </p>
                         <p className="text-sm text-gray-600">
                           Estoque: <span className="font-semibold">{produto.quant} unidades</span>
