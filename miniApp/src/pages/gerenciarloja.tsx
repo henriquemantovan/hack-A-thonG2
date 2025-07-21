@@ -2,19 +2,31 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  photo: string;
+  quant: number;
+  category: string;
+}
+
 const GerenciarLoja = () => {
   const router = useRouter();
-  const [produtos, setProdutos] = useState<any[]>([]);
+  const [produtos, setProdutos] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProdutos = async () => {
       try {
         const res = await fetch('/api/products');
         const data = await res.json();
-        console.log(data);
         setProdutos(data);
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
+        alert('Erro ao carregar produtos');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -25,15 +37,47 @@ const GerenciarLoja = () => {
     router.back();
   };
 
-  const handleEdit = (produto: any) => {
-    // TODO: implementar edição
-    console.log('Editar:', produto);
+  const handleEditar = (produto: Product) => {
+    alert(`Função de editar ainda não implementada para: ${produto.name}`);
   };
 
-  const handleDelete = (produto: any) => {
-    // TODO: implementar exclusão
-    console.log('Excluir:', produto);
+  const handleExcluir = async (produto: Product) => {
+    const confirmacao = window.confirm(`Tem certeza que deseja excluir o produto "${produto.name}"?`);
+    if (!confirmacao) return;
+
+    try {
+      const res = await fetch(`/api/products?id=${produto.id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert('Produto excluído com sucesso!');
+        setProdutos(produtos.filter(p => p.id !== produto.id));
+      } else {
+        alert('Erro ao excluir produto: ' + (data.error || 'Erro desconhecido'));
+      }
+    } catch (error) {
+      console.error('Erro ao excluir produto:', error);
+      alert('Erro ao excluir produto');
+    }
   };
+
+  const getImageUrl = (photo: string) => {
+    return photo.startsWith('http') ? photo : `/uploads/${photo}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-yellow-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+          <p className="text-lg text-gray-700 mt-4">Carregando produtos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ background: '#feebb3' }}>
@@ -41,10 +85,7 @@ const GerenciarLoja = () => {
         <div className="bg-gradient-to-b from-red-500 to-red-600 h-16 relative overflow-hidden shadow-lg">
           <div className="absolute inset-0 flex">
             {[...Array(12)].map((_, i) => (
-              <div
-                key={i}
-                className={`flex-1 ${i % 2 === 0 ? '#f2402e' : 'bg-white'}`}
-              />
+              <div key={i} className={`flex-1 ${i % 2 === 0 ? '#f2402e' : 'bg-white'}`} />
             ))}
           </div>
           <div className="relative z-10 flex items-center h-full px-6">
@@ -74,9 +115,7 @@ const GerenciarLoja = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {produtos.map((produto) => {
               const precoNumero = Number(produto.price);
-              const imagem = produto.photo?.startsWith('http')
-                ? produto.photo
-                : `/uploads/${produto.photo}`;
+              const imagem = getImageUrl(produto.photo);
 
               return (
                 <div key={produto.id} className="relative group">
@@ -90,6 +129,9 @@ const GerenciarLoja = () => {
                         src={imagem}
                         alt={produto.name}
                         className="w-full h-40 object-cover rounded-xl border-4 border-amber-200 shadow-inner"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://via.placeholder.com/200x200.png?text=Sem+Imagem';
+                        }}
                       />
                     </div>
                     <div className="text-center mb-4">
@@ -105,16 +147,16 @@ const GerenciarLoja = () => {
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleEdit(produto)}
-                        className="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 border-2 border-yellow-600 hover:border-yellow-700 flex items-center justify-center space-x-2"
+                        onClick={() => handleEditar(produto)}
+                        className="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 border-2 border-yellow-600 hover:border-yellow-700"
                       >
-                        <span>Editar</span>
+                        Editar
                       </button>
                       <button
-                        onClick={() => handleDelete(produto)}
-                        className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 border-2 border-red-700 hover:border-red-800 flex items-center justify-center space-x-2"
+                        onClick={() => handleExcluir(produto)}
+                        className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 border-2 border-red-700 hover:border-red-800"
                       >
-                        <span>Excluir</span>
+                        Excluir
                       </button>
                     </div>
                   </div>
