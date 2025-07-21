@@ -61,7 +61,8 @@ contract TactStore with Deployable {
         require(item.quantity > 0, "Item is out of stock");
 
         let ctx: Context = context();
-        require(ctx.value >= item.price, "Insufficient TON sent");
+        //UNIDADE: TON
+        require(ctx.value/1000000000 >= item.price, "Insufficient TON sent");
 
         send(SendParameters {
         to: item.owner,
