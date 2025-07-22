@@ -223,7 +223,7 @@ const CadastrarProduto = () => {
 
                 <div className="space-y-2">
                   <label className="block text-sm font-bold" style={{ color: '#5d412c' }}>
-                    Preço (R$)
+                    Preço
                   </label>
                   <input
                     type="number"

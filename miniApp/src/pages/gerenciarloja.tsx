@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import ModalEdicaoProduto from '../components/edicao';
 
 interface Product {
   id: string;
@@ -15,6 +16,8 @@ const GerenciarLoja = () => {
   const router = useRouter();
   const [produtos, setProdutos] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editandoProduto, setEditandoProduto] = useState<Product | null>(null);
+  const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -37,8 +40,74 @@ const GerenciarLoja = () => {
     router.back();
   };
 
+  const uploadImage = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao fazer upload da imagem');
+    }
+
+    const data = await response.json();
+    return data.url;
+  };
+
   const handleEditar = (produto: Product) => {
-    alert(`Função de editar ainda não implementada para: ${produto.name}`);
+    setEditandoProduto(produto);
+  };
+
+  const handleSalvarEdicao = async (produtoEditado: Product, novaImagem?: File) => {
+    setSalvando(true);
+
+    try {
+      let photoUrl = produtoEditado.photo;
+      
+      // Se uma nova imagem foi selecionada, faz o upload
+      if (novaImagem) {
+        photoUrl = await uploadImage(novaImagem);
+      }
+
+      const res = await fetch('/api/products', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: produtoEditado.id,
+          name: produtoEditado.name,
+          price: produtoEditado.price,
+          photo: photoUrl,
+          quant: produtoEditado.quant,
+          category: produtoEditado.category
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert('Produto atualizado com sucesso!');
+        setProdutos(produtos.map(p => p.id === produtoEditado.id ? data : p));
+        setEditandoProduto(null);
+      } else {
+        alert('Erro ao atualizar produto: ' + (data.error || 'Erro desconhecido'));
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar produto:', error);
+      alert('Erro ao atualizar produto');
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const handleFecharModal = () => {
+    if (!salvando) {
+      setEditandoProduto(null);
+    }
   };
 
   const handleExcluir = async (produto: Product) => {
@@ -138,7 +207,7 @@ const GerenciarLoja = () => {
                       <h3 className="text-lg font-bold text-gray-800 mb-2">{produto.name}</h3>
                       <div className="bg-amber-100 rounded-lg p-3 mb-3">
                         <p className="text-2xl font-bold text-green-600 mb-1">
-                          {isNaN(precoNumero) ? '0.00' : precoNumero.toFixed(2)}
+                          R$ {isNaN(precoNumero) ? '0.00' : precoNumero.toFixed(2)}
                         </p>
                         <p className="text-sm text-gray-600">
                           Estoque: <span className="font-semibold">{produto.quant} unidades</span>
@@ -166,6 +235,16 @@ const GerenciarLoja = () => {
           </div>
         </div>
       </main>
+
+      {/* Modal de Edição */}
+      {editandoProduto && (
+        <ModalEdicaoProduto
+          produto={editandoProduto}
+          onClose={handleFecharModal}
+          onSave={handleSalvarEdicao}
+          salvando={salvando}
+        />
+      )}
     </div>
   );
 };
