@@ -42,6 +42,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
+  if (req.method === 'PUT') {
+    const { id, name, price, photo, quant, category } = req.body
+
+    if (!id || !name || !price || !quant || !category) {
+      return res.status(400).json({ error: 'Todos os campos são obrigatórios' })
+    }
+
+    try {
+      const existingProduct = await prisma.product.findUnique({
+        where: { id }
+      })
+
+      if (!existingProduct) {
+        return res.status(404).json({ error: 'Produto não encontrado' })
+      }
+
+      const updatedProduct = await prisma.product.update({
+        where: { id },
+        data: {
+          name,
+          price: parseFloat(price),
+          photo: photo || existingProduct.photo, 
+          quant: parseInt(quant),
+          category
+        }
+      })
+      
+      return res.status(200).json(updatedProduct)
+    } catch (error) {
+      console.error("Erro ao atualizar produto:", error);
+      return res.status(500).json({ error: 'Erro ao atualizar o produto' });
+    }
+  }
+
   if (req.method === 'DELETE') {
     const { id } = req.query
 
@@ -58,7 +92,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ error: 'Produto não encontrado' })
       }
 
-      // Remove o produto do banco
       await prisma.product.delete({
         where: { id }
       })
