@@ -17,7 +17,13 @@ model Product {
   id        String       @id @default(uuid())
   name      String 
   price     Decimal      @db.Decimal(10, 2)
-  photo     String   // caminho ou URL da foto
+  photo     String   
   quant     Int
   category  String
 }
+
+model loja {
+  id_telegram Int    @id
+  loja        String
+}
+

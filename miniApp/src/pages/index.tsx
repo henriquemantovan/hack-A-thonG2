@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import Button from '../components/Button';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { TelegramWebApp } from '../utils/telegram';
 
@@ -12,11 +11,27 @@ declare global {
 }
 
 const Home = () => {
+  const [idTelegram, setIdTelegram] = useState<number | null | undefined>(null);
+  const [nomeLoja, setNomeLoja] = useState('');
+  const [loja, setLoja] = useState<{ loja: string } | null>(null);
+
   const router = useRouter();
 
   useEffect(() => {
     if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.expand();
+      const user = window.Telegram.WebApp.initDataUnsafe.user;
+      const id = user?.id;
+      setIdTelegram(id);
+
+      fetch(`/api/loja/${id}`)
+        .then(res => {
+          if (res.status === 404) {
+            setLoja(null);
+          } else {
+            return res.json().then(data => setLoja(data));
+          }
+        })
+        .catch(() => setLoja(null));
     }
   }, []);
 
@@ -27,6 +42,40 @@ const Home = () => {
   const handleButtonClick2 = () => {
     router.push('/gerenciarloja');
   };
+
+  const cadastrarLoja = async () => {
+    if (!idTelegram || !nomeLoja) return;
+
+    const res = await fetch('/api/loja', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_telegram: idTelegram, loja: nomeLoja }),
+    });
+
+    const dados = await res.json();
+    setLoja(dados);
+  };
+
+  if (loja === null) {
+    return (
+      <div className="p-4 text-center">
+        <h2 className="text-xl mb-4">Bem-vindo! Cadastre o nome da sua loja:</h2>
+        <input
+          className="border px-4 py-2 rounded mb-4"
+          value={nomeLoja}
+          onChange={(e) => setNomeLoja(e.target.value)}
+          placeholder="Nome da loja"
+        />
+        <br />
+        <button
+          className="bg-blue-500 text-white px-6 py-2 rounded"
+          onClick={cadastrarLoja}
+        >
+          Cadastrar
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-200 via-blue-100 to-indigo-200 p-4"
