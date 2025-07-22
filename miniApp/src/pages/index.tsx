@@ -17,23 +17,19 @@ const Home = () => {
 
   const router = useRouter();
 
-  useEffect(() => {
-    if (window.Telegram?.WebApp) {
-      const user = window.Telegram.WebApp.initDataUnsafe.user;
-      const id = user?.id;
-      setIdTelegram(id);
+useEffect(() => {
+  if (typeof window !== 'undefined') {
+    const tg = window.Telegram?.WebApp;
 
-      fetch(`/api/loja/${id}`)
-        .then(res => {
-          if (res.status === 404) {
-            setLoja(null);
-          } else {
-            return res.json().then(data => setLoja(data));
-          }
-        })
-        .catch(() => setLoja(null));
+    if (tg?.initDataUnsafe?.user?.id) {
+      setIdTelegram(tg.initDataUnsafe.user.id);
+      console.log("ID Telegram:", tg.initDataUnsafe.user.id);
+    } else {
+      console.warn("Usuário não identificado:", tg?.initDataUnsafe);
     }
-  }, []);
+  }
+}, []);
+
 
   const handleButtonClick1 = () => {
     router.push('/novoproduto');
