@@ -1,14 +1,21 @@
-import { prisma } from '../lib/prisma';
+import { prisma } from '../../../../lib/prisma';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const id = parseInt(req.query.id as string);
+  if (req.method !== 'POST') return res.status(405).end();
 
-  const loja = await prisma.loja.findUnique({
-    where: { id_telegram: id },
-  });
+  const { id_telegram, loja } = req.body;
 
-  if (!loja) return res.status(404).json({ error: 'Loja não encontrada' });
-
-  res.status(200).json(loja);
+  try {
+    const nova = await prisma.loja.create({
+      data: {
+        id_telegram,
+        loja,
+      },
+    });
+    res.status(201).json(nova);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao cadastrar loja' });
+  }
 }
