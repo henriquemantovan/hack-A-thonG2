@@ -367,10 +367,11 @@ const CadastrarProduto = () => {
                   <button
                     onClick={handleCadastrar}
                     disabled={uploading}
+                    
                     className={`flex-1 cursor-pointer font-bold py-4 px-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 border-2 text-lg ${
                       uploading
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-400'
-                        : 'bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white border-green-600 hover:border-green-700'
+                        : 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white border-amber-600 hover:border-amber-700'
                     }`}
                     style={!uploading ? { background: '#f0ae00', border: '2px solid #f0ae00' } : {}}
                   >
