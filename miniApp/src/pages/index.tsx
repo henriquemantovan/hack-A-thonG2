@@ -27,17 +27,38 @@ const Home = () => {
   useEffect(() => {
     // Verifica se está rodando no Telegram
     if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.expand();
-      const user = window.Telegram.WebApp.initDataUnsafe?.user;
-      if (user?.id) {
-        setUserId(user.id.toString());
-        verificarLoja(user.id.toString());
-      } else {
-        setLoading(false);
+      const webApp = window.Telegram.WebApp;
+      webApp.expand();
+      
+      // Verifica se veio do bot (initData)
+      if (webApp.initData) {
+        const user = webApp.initDataUnsafe?.user;
+        if (user?.id) {
+          setUserId(user.id.toString());
+          verificarLoja(user.id.toString());
+          return;
+        }
       }
-    } else {
-      setLoading(false);
+      
+      // Se não tem initData, tenta pegar do query string (quando aberto pelo bot)
+      const queryParams = new URLSearchParams(window.location.search);
+      const tgWebAppData = queryParams.get('tgWebAppData');
+      
+      if (tgWebAppData) {
+        try {
+          const data = JSON.parse(decodeURIComponent(tgWebAppData));
+          if (data.user?.id) {
+            setUserId(data.user.id.toString());
+            verificarLoja(data.user.id.toString());
+            return;
+          }
+        } catch (e) {
+          console.error('Error parsing tgWebAppData:', e);
+        }
+      }
     }
+    
+    setLoading(false);
   }, []);
 
   const verificarLoja = async (telegramId: string) => {

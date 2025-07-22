@@ -523,13 +523,39 @@ bot.onText(/\/meus_pedidos/, (msg) => {
 });
 
 // Comando para abrir Mini App
+// Comando para abrir Mini App
 bot.onText(/\/app/, (msg) => {
   const chatId = msg.chat.id;
+  const userId = msg.from?.id;
   
+  if (!userId) return;
+
+  // Prepara os dados do usuário para passar ao Mini App
+  const userData = {
+    user: {
+      id: userId,
+      first_name: msg.from?.first_name,
+      last_name: msg.from?.last_name,
+      username: msg.from?.username
+    },
+    chat: {
+      id: msg.chat.id
+    }
+  };
+
+  // Codifica os dados para URL
+  const encodedData = encodeURIComponent(JSON.stringify(userData));
+  const webAppUrl = `${WEBAPP_URL}?tgWebAppData=${encodedData}`;
+
   const keyboard = {
     inline_keyboard: [
       [
-        { text: '📱 Abrir Mini App', web_app: { url: WEBAPP_URL } }
+        { 
+          text: '📱 Abrir Mini App', 
+          web_app: { 
+            url: webAppUrl
+          } 
+        }
       ]
     ]
   };
@@ -540,19 +566,31 @@ bot.onText(/\/app/, (msg) => {
 });
 
 // Manipular dados do WebApp
+// Atualize o manipulador de web_app_data no seu bot:
+
 bot.on('web_app_data', async (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from?.id;
   
-  if (!userId) return;
+  // Verifica se web_app_data existe
+  if (!msg.web_app_data?.data) {
+    bot.sendMessage(chatId, 'Dados do WebApp não recebidos corretamente.');
+    return;
+  }
 
   try {
     const orderData = JSON.parse(msg.web_app_data.data);
     
+    // Validação básica dos dados
+    if (!orderData?.items || !Array.isArray(orderData.items)) {
+      bot.sendMessage(chatId, 'Formato de dados inválido. Itens do pedido não encontrados.');
+      return;
+    }
+
     // Criar pedido a partir dos dados do WebApp
     const order: Order = {
       id: crypto.randomUUID(),
-      userId: userId,
+      userId: userId!,
       items: orderData.items.map((item: any) => ({
         productId: item.product.id,
         productName: item.product.name,
