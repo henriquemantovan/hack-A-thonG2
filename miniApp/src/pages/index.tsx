@@ -44,8 +44,11 @@ const Home = () => {
   };
 
   const cadastrarLoja = async () => {
-    if (!idTelegram || !nomeLoja) return;
-
+  if (!idTelegram || !nomeLoja) {
+    alert(idTelegram);
+    alert(nomeLoja);
+    return;
+  }
     const res = await fetch('/api/loja', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -73,6 +76,7 @@ const Home = () => {
         >
           Cadastrar
         </button>
+        
       </div>
     );
   }
