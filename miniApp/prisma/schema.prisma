@@ -14,10 +14,16 @@ datasource db {
 }
 
 model Product {
-  id        String       @id @default(uuid())
-  name      String 
-  price     Decimal      @db.Decimal(10, 2)
-  photo     String   // caminho ou URL da foto
-  quant     Int
-  category  String
+  id       String  @id @default(uuid())
+  name     String
+  price    Decimal @db.Decimal(10, 2)
+  photo    String // caminho ou URL da foto
+  quant    Int
+  category String
+}
+
+model Loja {
+  id          String @id @default(uuid())
+  id_telegram String @unique
+  nome_loja   String
 }
