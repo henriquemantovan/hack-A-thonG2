@@ -38,7 +38,10 @@ const ModalEdicaoProduto: React.FC<ModalEdicaoProdutoProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+    style={{ background: 'rgba(0, 0, 0, 0.5)',
+        backdropFilter: 'blur(4px)', transition: 'background 0.3s ease'
+     }}>
       <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-screen overflow-y-auto relative">
         {/* Header com design temático */}
         <div className="relative">
@@ -48,17 +51,20 @@ const ModalEdicaoProduto: React.FC<ModalEdicaoProdutoProps> = ({
                 <div key={i} className={`flex-1 ${i % 2 === 0 ? 'bg-red-500' : 'bg-white'}`} />
               ))}
             </div>
-            <div className="relative z-10 flex items-center justify-center h-full px-6">
-              <h3 className="text-2xl font-bold text-white font-serif">Editar Produto</h3>
-            </div>
+
           </div>
           <div className="h-2 bg-gradient-to-b from-red-700 to-red-800" />
         </div>
 
-        {/* Conteúdo do modal com design temático */}
+        {/* conteudo*/}
         <div className="p-8" style={{ background: 'linear-gradient(135deg, #feebb3 0%, #fef3c7 100%)' }}>
+          <div className="text-center mb-8">
+            <h2 className="text-5xl font-bold mb-2 font-serif" style={{ color: '#5d412c' }}>
+              Editar Produto
+            </h2>
+          </div>
           <div className="space-y-6">
-            {/* Nome do Produto */}
+            {/* nome */}
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl group-hover:rotate-1 transition-transform duration-300" />
               <div className="relative bg-white rounded-2xl p-4 shadow-lg">
@@ -76,7 +82,7 @@ const ModalEdicaoProduto: React.FC<ModalEdicaoProdutoProps> = ({
 
             {/* Preço */}
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-green-400 to-green-500 rounded-2xl group-hover:rotate-1 transition-transform duration-300" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl group-hover:rotate-1 transition-transform duration-300" />
               <div className="relative bg-white rounded-2xl p-4 shadow-lg">
                 <label className="block text-sm font-bold mb-2" style={{ color: '#5d412c' }}>Preço (R$)</label>
                 <input
@@ -85,18 +91,17 @@ const ModalEdicaoProduto: React.FC<ModalEdicaoProdutoProps> = ({
                   min="0"
                   value={editandoProduto.price}
                   onChange={(e) => setEditandoProduto({...editandoProduto, price: parseFloat(e.target.value) || 0})}
-                  className="w-full px-4 py-3 border-2 border-green-200 rounded-xl focus:ring-2 focus:ring-green-400 focus:border-transparent text-gray-800 font-semibold"
+                  className="w-full px-4 py-3 border-2 border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:border-transparent text-gray-800 font-semibold"
                   disabled={salvando}
                   placeholder="0.00"
                 />
               </div>
             </div>
 
-            {/* Quantidade e Categoria na mesma linha */}
+            {/* Quantidade e Categoria */}
             <div className="grid grid-cols-2 gap-4">
-              {/* Quantidade */}
               <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-blue-500 rounded-2xl group-hover:rotate-1 transition-transform duration-300" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl group-hover:rotate-1 transition-transform duration-300" />
                 <div className="relative bg-white rounded-2xl p-4 shadow-lg">
                   <label className="block text-sm font-bold mb-2" style={{ color: '#5d412c' }}>Quantidade</label>
                   <input
@@ -111,9 +116,8 @@ const ModalEdicaoProduto: React.FC<ModalEdicaoProdutoProps> = ({
                 </div>
               </div>
 
-              {/* Categoria */}
               <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-purple-500 rounded-2xl group-hover:rotate-1 transition-transform duration-300" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl group-hover:rotate-1 transition-transform duration-300" />
                 <div className="relative bg-white rounded-2xl p-4 shadow-lg">
                   <label className="block text-sm font-bold mb-2" style={{ color: '#5d412c' }}>Categoria</label>
                   <input
@@ -128,16 +132,15 @@ const ModalEdicaoProduto: React.FC<ModalEdicaoProdutoProps> = ({
               </div>
             </div>
 
-            {/* Seção de Imagem */}
+            {/* imagens */}
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-pink-400 to-pink-500 rounded-2xl group-hover:rotate-1 transition-transform duration-300" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl group-hover:rotate-1 transition-transform duration-300" />
               <div className="relative bg-white rounded-2xl p-4 shadow-lg">
                 <label className="block text-sm font-bold mb-3" style={{ color: '#5d412c' }}>Imagem do Produto</label>
                 
-                {/* Imagem atual */}
                 <div className="mb-4">
                   <p className="text-sm text-gray-600 mb-2">Imagem atual:</p>
-                  <div className="relative w-full h-48 bg-gray-100 rounded-xl overflow-hidden border-4 border-pink-200">
+                  <div className="relative w-full h-48 bg-gray-100 rounded-xl overflow-hidden border-4 border-amber-200">
                     <img
                       src={getImageUrl(editandoProduto.photo)}
                       alt={editandoProduto.name}
@@ -149,13 +152,12 @@ const ModalEdicaoProduto: React.FC<ModalEdicaoProdutoProps> = ({
                   </div>
                 </div>
                 
-                {/* Upload nova imagem */}
                 <label
                   htmlFor="nova-imagem"
                   className={`block w-full text-center py-3 px-4 rounded-xl cursor-pointer transition font-bold shadow-inner ${
                     salvando 
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-pink-100 to-pink-200 text-pink-700 hover:from-pink-200 hover:to-pink-300 border-2 border-pink-300'
+                      : 'bg-gradient-to-r from-amber-300 to-amber-300 text-amber-900 hover:from-amber-200 hover:to-amber-300 border-2 border-amber-300'
                   }`}
                 >
                   {salvando ? 'Processando...' : (novaImagem ? '✓ Nova imagem selecionada' : '📷 Alterar imagem')}
@@ -173,11 +175,10 @@ const ModalEdicaoProduto: React.FC<ModalEdicaoProdutoProps> = ({
                   }}
                 />
                 
-                {/* Preview da nova imagem */}
                 {novaImagem && (
-                  <div className="mt-4 p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border-2 border-green-200">
-                    <p className="text-sm font-bold text-green-700 mb-2">✓ Preview da nova imagem:</p>
-                    <div className="w-full h-48 bg-gray-100 rounded-xl overflow-hidden border-2 border-green-300">
+                  <div className="mt-4 p-3 bg-gradient-to-r from-amber-50 to-amber-100 rounded-xl border-2 border-amber-200">
+                    <p className="text-sm font-bold text-amber-700 mb-2">✓ Preview da nova imagem:</p>
+                    <div className="w-full h-48 bg-gray-100 rounded-xl overflow-hidden border-2 border-amber-300">
                       <img
                         src={URL.createObjectURL(novaImagem)}
                         alt="Prévia"
@@ -189,18 +190,15 @@ const ModalEdicaoProduto: React.FC<ModalEdicaoProdutoProps> = ({
               </div>
             </div>
 
-            {/* Botões de Ação */}
             <div className="flex gap-4 pt-4">
-              {/* Botão Salvar */}
               <div className="flex-1 relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-green-400 to-green-500 rounded-2xl group-hover:rotate-1 transition-transform duration-300" />
                 <button
                   onClick={handleSalvar}
                   disabled={salvando}
-                  className={`relative w-full py-4 px-6 rounded-2xl font-bold text-lg shadow-lg transform transition-all duration-200 ${
+                    className={`flex-1 cursor-pointer font-bold py-4 px-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 border-2 text-lg ${
                     salvando
-                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                      : 'bg-white text-green-600 hover:scale-105 hover:shadow-xl border-2 border-green-300'
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-400'
+                        : 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white border-amber-600 hover:border-amber-700'
                   }`}
                 >
                   {salvando ? (
@@ -209,24 +207,22 @@ const ModalEdicaoProduto: React.FC<ModalEdicaoProdutoProps> = ({
                       Salvando...
                     </>
                   ) : (
-                    '✓ Salvar Alterações'
+                    'Salvar Alterações'
                   )}
                 </button>
               </div>
 
-              {/* Botão Cancelar */}
               <div className="flex-1 relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-gray-400 to-gray-500 rounded-2xl group-hover:rotate-1 transition-transform duration-300" />
                 <button
                   onClick={onClose}
                   disabled={salvando}
-                  className={`relative w-full py-4 px-6 rounded-2xl font-bold text-lg shadow-lg transform transition-all duration-200 ${
+                  className={`relative w-full font-bold cursor-pointer py-4 px-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 border-2 text-lg ${
                     salvando
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-white text-gray-600 hover:scale-105 hover:shadow-xl border-2 border-gray-400'
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-400'
+                        : 'bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white border-red-600 hover:border-red-700'
                   }`}
                 >
-                  ✕ Cancelar
+                  Cancelar
                 </button>
               </div>
             </div>
