@@ -7,6 +7,7 @@ interface Product {
   photo: string;
   quant: number;
   category: string;
+  id_vendor: string;
 }
 
 interface ModalEdicaoProdutoProps {
