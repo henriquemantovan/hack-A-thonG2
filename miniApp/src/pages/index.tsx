@@ -18,12 +18,38 @@ const Home = () => {
   useEffect(() => {
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.expand();
+      window.Telegram.WebApp.ready();
       
-      // Obtém os dados do usuário do Telegram
-      const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
-      if (telegramUser) {
-        setUser(telegramUser);
-      }
+      // Função para tentar obter os dados do usuário
+      const getUserData = () => {
+        const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
+        console.log('Telegram WebApp initDataUnsafe:', window.Telegram.WebApp.initDataUnsafe);
+        console.log('Telegram User:', telegramUser);
+        
+        if (telegramUser) {
+          setUser(telegramUser);
+        } else {
+          // Fallback: tentar novamente após um pequeno delay
+          setTimeout(() => {
+            const retryUser = window.Telegram.WebApp.initDataUnsafe?.user;
+            if (retryUser) {
+              setUser(retryUser);
+            } else {
+              // Se ainda não conseguir, definir um usuário de teste para desenvolvimento
+              console.warn('Não foi possível obter dados do usuário do Telegram');
+              // Descomente a linha abaixo apenas para teste em desenvolvimento
+              // setUser({ id: 123456789, first_name: 'Usuário Teste' });
+            }
+          }, 1000);
+        }
+      };
+
+      getUserData();
+    } else {
+      // Para desenvolvimento fora do Telegram
+      console.warn('Telegram WebApp não disponível');
+      // Descomente a linha abaixo apenas para teste em desenvolvimento
+      // setUser({ id: 123456789, first_name: 'Dev User' });
     }
   }, []);
 
@@ -40,7 +66,14 @@ const Home = () => {
     if (user) {
       return `${user.first_name} (ID: ${user.id})`;
     }
-    return 'CALMA';
+    
+    // Verificar se ainda está tentando carregar
+    if (window.Telegram?.WebApp) {
+      return 'Carregando...';
+    }
+    
+    // Fallback para desenvolvimento
+    return 'Loja Demo';
   };
 
   return (
