@@ -1,7 +1,7 @@
 {
-    "url": "https://hack-a-thon-g2.vercel.app/",
-    "name": "loja",
-    "iconUrl": "<app-icon-url>",
-    "termsOfUseUrl": "<terms-of-use-url>",
-    "privacyPolicyUrl": "<privacy-policy-url>"
+  "url": "https://hack-a-thon-g2.vercel.app",
+  "name": "loja",
+  "iconUrl": "https://hack-a-thon-g2.vercel.app/logo.png",
+  "termsOfUseUrl": "https://hack-a-thon-g2.vercel.app/terms",
+  "privacyPolicyUrl": "https://hack-a-thon-g2.vercel.app/privacy"
 }
