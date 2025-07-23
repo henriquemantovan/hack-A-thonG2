@@ -35,6 +35,14 @@ const Home = () => {
     router.push('/gerenciarloja');
   };
 
+  const requestUserData = () => {
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.sendData(JSON.stringify({
+        action: "request_user"
+      }));
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-200 via-blue-100 to-indigo-200 p-4"
                         style={{ background: '#0d97ac' }}
@@ -86,6 +94,12 @@ const Home = () => {
             >
               {firstName}!
             </h2>
+            <button
+              onClick={requestUserData}
+              className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg shadow-md transition-colors"
+            >
+              Conectar minha conta do Telegram
+            </button>
             
             <div className="space-y-4">
               <button
