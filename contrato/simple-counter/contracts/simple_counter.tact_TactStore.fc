@@ -533,7 +533,7 @@ _ %get_item_count() method_id(118255) {
         var ($item'price, $item'quantity, $item'owner) = $Item$_not_null($itemOpt);
         throw_unless(54969, ($item'quantity > 0));
         var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
-        throw_unless(48341, ($ctx'value >= $item'price));
+        throw_unless(48341, (($ctx'value / 1000000000) >= $item'price));
         $global_send($SendParameters$_constructor_to_value($item'owner, $ctx'value));
         int $newQuantity = ($item'quantity - 1);
         if (($newQuantity > 0)) {

@@ -1,6 +1,6 @@
 # Tact compilation report
 Contract: TactStore
-BoC Size: 790 bytes
+BoC Size: 798 bytes
 
 ## Structures (Structs and Messages)
 Total structures: 18

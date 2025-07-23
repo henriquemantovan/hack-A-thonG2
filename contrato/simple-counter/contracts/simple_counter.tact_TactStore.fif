@@ -369,7 +369,10 @@ PROGRAM{
       s1 s3 XCHG
       3 BLKDROP
       48341 PUSHINT
-      s1 s4 PUSH2
+      OVER
+      1000000000 PUSHINT
+      DIV
+      s5 PUSH
       GEQ
       THROWANYIFNOT
       s1 s(-1) PUXC
