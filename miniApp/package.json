@@ -16,11 +16,13 @@
     "@ton/core": "^0.61.0",
     "@tonconnect/sdk": "^3.2.0",
     "@tonconnect/ui-react": "^2.2.0",
+    "@types/react-router-dom": "^5.3.3",
     "cloudinary": "^2.7.0",
     "formidable": "^3.5.4",
     "next": "^13.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-router-dom": "^6.22.3",
     "ton": "^13.9.0"
   },
   "devDependencies": {

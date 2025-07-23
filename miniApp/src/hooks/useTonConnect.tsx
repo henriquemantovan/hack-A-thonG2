@@ -10,7 +10,7 @@ export function useTonConnect(): {
 } {
     const [tonConnectUI] = useTonConnectUI()
     const wallet = useTonWallet()
-
+    
     return {
         connected: !!wallet?.account.address,
         wallet: wallet?.account.address ?? null,
