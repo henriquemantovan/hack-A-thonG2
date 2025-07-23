@@ -3,6 +3,10 @@ import TelegramBot from 'node-telegram-bot-api';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
 import 'dotenv/config';
+import { PrismaClient } from '@prisma/client'; // Import PrismaClient
+
+// Initialize Prisma Client
+const prisma = new PrismaClient();
 
 // Configurações principais
 const BOT_TOKEN    = process.env.BOT_TOKEN!;
@@ -41,39 +45,48 @@ app.listen(PORT, async () => {
   } catch (err) {
     console.error('🚨 Falha ao registrar webhook:', err);
   }
-  
+
   // Aqui apenas log de servidor, sem menção a polling
   console.log(`🚀 Server rodando em http://localhost:${PORT}`);
 });
 
+// Type definitions for in-memory data (will be replaced by DB types)
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  description: string; // Assuming you might add this later or derive from photo
+  storeId: string;
+  stock: number;
+}
 
+interface Store {
+  id: string;
+  name: string;
+  description: string;
+  ownerId: number; // This might become optional or derived if not in Lojas model
+  products: Product[];
+}
 
-// Dados em memória (em produção, usar banco de dados)
-let stores: Store[] = [
-  {
-    id: '1',
-    name: 'Loja da Maria',
-    description: 'Produtos artesanais e naturais',
-    ownerId: 123456789, // ID do usuário vendedor
-    products: [
-      { id: '1', name: 'Sabonete Artesanal', price: 15.99, description: 'Sabonete natural de lavanda', storeId: '1', stock: 10 },
-      { id: '2', name: 'Mel Orgânico', price: 25.50, description: 'Mel puro de abelhas', storeId: '1', stock: 5 },
-      { id: '3', name: 'Vela Aromática', price: 18.00, description: 'Vela de soja com óleo essencial', storeId: '1', stock: 8 }
-    ]
-  },
-  {
-    id: '2',
-    name: 'Tech Store',
-    description: 'Acessórios tecnológicos',
-    ownerId: 987654321, // ID do usuário vendedor
-    products: [
-      { id: '4', name: 'Cabo USB-C', price: 29.99, description: 'Cabo USB-C 2 metros', storeId: '2', stock: 20 },
-      { id: '5', name: 'Carregador Wireless', price: 45.00, description: 'Carregador sem fio 15W', storeId: '2', stock: 15 },
-      { id: '6', name: 'Fone Bluetooth', price: 89.99, description: 'Fone de ouvido sem fio', storeId: '2', stock: 12 }
-    ]
-  }
-];
+interface OrderItem {
+  productId: string;
+  productName: string;
+  quantity: number;
+  price: number;
+}
 
+interface Order {
+  id: string;
+  userId: number;
+  items: OrderItem[];
+  total: number;
+  status: 'pending' | 'paid' | 'cancelled';
+  paymentAddress?: string;
+  transactionHash?: string;
+  createdAt: Date;
+}
+
+// Dados em memória (em produção, usar banco de dados) - REMOVED, will fetch from DB
 let orders: Order[] = [];
 
 // Função para gerar endereço TON (mock)
@@ -93,7 +106,7 @@ bot.onText(/\/start/, (msg) => {
   const userId = msg.from?.id;
   const firstName = msg.from?.first_name;
   const lastName = msg.from?.last_name;
-  
+
   // Criar URL com parâmetros do usuário
   const userParams = new URLSearchParams({
     user_id: userId?.toString() || '',
@@ -101,9 +114,9 @@ bot.onText(/\/start/, (msg) => {
     last_name: lastName || '',
     chat_id: chatId.toString()
   });
-  
+
   const miniAppUrl = `${WEBAPP_URL}?${userParams.toString()}`;
-  
+
   const welcomeMessage = `
 🛒 **Bem-vindo ao TON E-Commerce, ${firstName}!**
 
@@ -133,36 +146,43 @@ Escolha uma opção abaixo:
 });
 
 // Listar lojas
-bot.onText(/\/lojas/, (msg) => {
+bot.onText(/\/lojas/, async (msg) => {
   const chatId = msg.chat.id;
-  
-  if (stores.length === 0) {
-    bot.sendMessage(chatId, 'Nenhuma loja cadastrada ainda.');
-    return;
+
+  try {
+    const stores = await prisma.lojas.findMany(); // Fetch stores from the database
+
+    if (stores.length === 0) {
+      bot.sendMessage(chatId, 'Nenhuma loja cadastrada ainda.');
+      return;
+    }
+
+    const keyboard = {
+      inline_keyboard: stores.map(store => [
+        { text: `🏪 ${store.nome_loja}`, callback_data: `store_${store.id}` }
+      ])
+    };
+
+    bot.sendMessage(chatId, '🏪 **Lojas Disponíveis:**', {
+      parse_mode: 'Markdown',
+      reply_markup: keyboard
+    });
+  } catch (error) {
+    console.error('Error fetching stores:', error);
+    bot.sendMessage(chatId, 'Ocorreu um erro ao buscar as lojas. Tente novamente.');
   }
-
-  const keyboard = {
-    inline_keyboard: stores.map(store => [
-      { text: `🏪 ${store.name}`, callback_data: `store_${store.id}` }
-    ])
-  };
-
-  bot.sendMessage(chatId, '🏪 **Lojas Disponíveis:**', {
-    parse_mode: 'Markdown',
-    reply_markup: keyboard
-  });
 });
 
 // Callback queries
 bot.on('callback_query', async (query) => {
   const chatId = query.message?.chat.id;
   const data = query.data;
-  
+
   if (!chatId || !data) return;
 
   try {
     if (data === 'list_stores') {
-      // Listar lojas
+      const stores = await prisma.lojas.findMany(); // Fetch stores from the database
       if (stores.length === 0) {
         bot.sendMessage(chatId, 'Nenhuma loja cadastrada ainda.');
         return;
@@ -170,7 +190,7 @@ bot.on('callback_query', async (query) => {
 
       const keyboard = {
         inline_keyboard: stores.map(store => [
-          { text: `🏪 ${store.name}`, callback_data: `store_${store.id}` }
+          { text: `🏪 ${store.nome_loja}`, callback_data: `store_${store.id}` }
         ])
       };
 
@@ -179,20 +199,45 @@ bot.on('callback_query', async (query) => {
         reply_markup: keyboard
       });
     }
-    
+
     else if (data.startsWith('store_')) {
       const storeId = data.replace('store_', '');
-      const store = stores.find(s => s.id === storeId);
-      
+
+      // First, fetch the store details
+      const store = await prisma.lojas.findUnique({
+        where: { id: storeId },
+      });
+
       if (!store) {
         bot.sendMessage(chatId, 'Loja não encontrada.');
         return;
       }
 
-      let message = `🏪 **${store.name}**\n${store.description}\n\n📦 **Produtos:**\n\n`;
-      
+      // Second, fetch products associated with this storeId (id_vendor)
+      const products = await prisma.product.findMany({
+        where: { id_vendor: store.id }, // Linking by id_vendor from Product to Lojas.id
+      });
+
+      let message = `🏪 **${store.nome_loja}**\n\n`;
+
+      if (products.length === 0) {
+        message += '📦 Nenhum produto cadastrado para esta loja ainda.';
+        const keyboard = {
+          inline_keyboard: [
+            [{ text: '🔙 Voltar às Lojas', callback_data: 'list_stores' }]
+          ]
+        };
+        bot.sendMessage(chatId, message, {
+          parse_mode: 'Markdown',
+          reply_markup: keyboard
+        });
+        return;
+      }
+
+      message += '📦 **Produtos:**\n\n';
+
       const keyboard = {
-        inline_keyboard: store.products.map(product => [
+        inline_keyboard: products.map(product => [
           { text: `${product.name} - R$ ${product.price.toFixed(2)}`, callback_data: `product_${product.id}` }
         ])
       };
@@ -206,24 +251,29 @@ bot.on('callback_query', async (query) => {
         reply_markup: keyboard
       });
     }
-    
+
     else if (data.startsWith('product_')) {
       const productId = data.replace('product_', '');
-      const product = stores.flatMap(s => s.products).find(p => p.id === productId);
-      
+      // Fetch product and its associated store from the database
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+      });
+
       if (!product) {
         bot.sendMessage(chatId, 'Produto não encontrado.');
         return;
       }
 
-      const store = stores.find(s => s.id === product.storeId);
-      
+      // Since we don't have a direct relation in schema, fetch the store separately
+      const store = await prisma.lojas.findUnique({
+          where: { id: product.id_vendor }
+      });
+
       const message = `
 📦 **${product.name}**
 💰 Preço: R$ ${product.price.toFixed(2)}
-📋 Descrição: ${product.description}
-🏪 Loja: ${store?.name}
-📊 Estoque: ${product.stock} unidades
+📋 Descrição: ${product.photo} 🏪 Loja: ${store?.nome_loja || 'N/A'}
+📊 Estoque: ${product.quant} unidades
       `;
 
       const keyboard = {
@@ -232,7 +282,7 @@ bot.on('callback_query', async (query) => {
             { text: '🛒 Comprar Agora', callback_data: `buy_${product.id}` }
           ],
           [
-            { text: '🔙 Voltar à Loja', callback_data: `store_${product.storeId}` }
+            { text: '🔙 Voltar à Loja', callback_data: `store_${product.id_vendor}` }
           ]
         ]
       };
@@ -242,17 +292,19 @@ bot.on('callback_query', async (query) => {
         reply_markup: keyboard
       });
     }
-    
+
     else if (data.startsWith('buy_')) {
       const productId = data.replace('buy_', '');
-      const product = stores.flatMap(s => s.products).find(p => p.id === productId);
-      
+      const product = await prisma.product.findUnique({ // Fetch product from DB
+        where: { id: productId }
+      });
+
       if (!product) {
         bot.sendMessage(chatId, 'Produto não encontrado.');
         return;
       }
 
-      // Criar pedido
+      // Create order
       const order: Order = {
         id: crypto.randomUUID(),
         userId: query.from.id,
@@ -260,9 +312,9 @@ bot.on('callback_query', async (query) => {
           productId: product.id,
           productName: product.name,
           quantity: 1,
-          price: product.price
+          price: product.price.toNumber() // Convert Decimal to number
         }],
-        total: product.price,
+        total: product.price.toNumber(), // Convert Decimal to number
         status: 'pending',
         paymentAddress: generateTonAddress(),
         createdAt: new Date()
@@ -272,7 +324,7 @@ bot.on('callback_query', async (query) => {
 
       // Gerar QR Code
       const qrBuffer = await generatePaymentQR(order.paymentAddress!, order.total);
-      
+
       const message = `
 🛒 **Pedido Criado!**
 📋 ID: ${order.id}
@@ -302,11 +354,11 @@ Escaneie o QR Code abaixo para pagar:
         reply_markup: keyboard
       });
     }
-    
+
     else if (data.startsWith('confirm_payment_')) {
       const orderId = data.replace('confirm_payment_', '');
       const order = orders.find(o => o.id === orderId);
-      
+
       if (!order) {
         bot.sendMessage(chatId, 'Pedido não encontrado.');
         return;
@@ -338,11 +390,11 @@ Escaneie o QR Code abaixo para pagar:
       // Notificar vendedor (se implementado)
       // notifyVendor(order);
     }
-    
+
     else if (data.startsWith('cancel_order_')) {
       const orderId = data.replace('cancel_order_', '');
       const order = orders.find(o => o.id === orderId);
-      
+
       if (!order) {
         bot.sendMessage(chatId, 'Pedido não encontrado.');
         return;
@@ -351,17 +403,17 @@ Escaneie o QR Code abaixo para pagar:
       order.status = 'cancelled';
       bot.sendMessage(chatId, '❌ Pedido cancelado com sucesso.');
     }
-    
+
     else if (data === 'my_orders') {
       const userOrders = orders.filter(o => o.userId === query.from.id);
-      
+
       if (userOrders.length === 0) {
         bot.sendMessage(chatId, 'Você ainda não fez nenhum pedido.');
         return;
       }
 
       let message = '🛍️ **Meus Pedidos:**\n\n';
-      
+
       userOrders.forEach(order => {
         const statusEmoji = order.status === 'paid' ? '✅' : order.status === 'pending' ? '⏳' : '❌';
         message += `${statusEmoji} **${order.id}**\n`;
@@ -387,28 +439,28 @@ Escaneie o QR Code abaixo para pagar:
 bot.onText(/\/meus_pedidos/, (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from?.id;
-  
+
   if (!userId) return;
 
   const userOrders = orders.filter(o => o.userId === userId);
-  
+
   if (userOrders.length === 0) {
     bot.sendMessage(chatId, 'Você ainda não fez nenhum pedido.');
     return;
   }
 
   let message = '🛍️ **Meus Pedidos:**\n\n';
-  
+
   userOrders.forEach(order => {
     const statusEmoji = order.status === 'paid' ? '✅' : order.status === 'pending' ? '⏳' : '❌';
     message += `${statusEmoji} **${order.id}**\n`;
     message += `💰 Total: R$ ${order.total.toFixed(2)}\n`;
     message += `📅 Data: ${order.createdAt.toLocaleDateString('pt-BR')}\n`;
-    
+
     order.items.forEach(item => {
       message += `  • ${item.productName} (${item.quantity}x) - R$ ${(item.price * item.quantity).toFixed(2)}\n`;
     });
-    
+
     message += '\n';
   });
 
@@ -423,7 +475,7 @@ bot.onText(/\/app/, (msg) => {
   const userId = msg.from?.id;
   const firstName = msg.from?.first_name;
   const lastName = msg.from?.last_name;
-  
+
   // Criar URL com parâmetros do usuário
   const userParams = new URLSearchParams({
     user_id: userId?.toString() || '',
@@ -431,9 +483,9 @@ bot.onText(/\/app/, (msg) => {
     last_name: lastName || '',
     chat_id: chatId.toString()
   });
-  
+
   const miniAppUrl = `${WEBAPP_URL}?${userParams.toString()}`;
-  
+
   const keyboard = {
     inline_keyboard: [
       [
@@ -457,14 +509,14 @@ bot.on('web_app_data', async (msg) => {
     // nada a fazer se não veio payload
     return;
   }
-  
+
   if (!userId) return;
 
   try {
 
     const orderData = JSON.parse(webApp.data);
-    
-    // Criar pedido a partir dos dados do WebApp
+
+    // Create order from WebApp data
     const order: Order = {
       id: crypto.randomUUID(),
       userId: userId,
@@ -484,7 +536,7 @@ bot.on('web_app_data', async (msg) => {
 
     // Gerar QR Code
     const qrBuffer = await generatePaymentQR(order.paymentAddress!, order.total);
-    
+
     const message = `
 🛒 **Pedido Criado via Mini App!**
 📋 ID: ${order.id}
