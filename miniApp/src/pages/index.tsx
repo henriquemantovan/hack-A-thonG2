@@ -154,11 +154,11 @@ const Home = () => {
   };
 
   const handleButtonClick1 = () => {
-    router.push('/novoproduto');
+    router.push('/novoproduto/' + userData.userId);
   };
 
   const handleButtonClick2 = () => {
-    router.push('/gerenciarloja');
+    router.push('/gerenciarloja/'+ userData.userId);
   };
 
   // Tela de loading
