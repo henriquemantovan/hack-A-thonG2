@@ -1,0 +1,23 @@
+{
+  "name": "telegrambotlambda",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^17.2.0",
+    "node-telegram-bot-api": "^0.66.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.152",
+    "serverless": "^3.40.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-offline": "^14.4.0"
+  }
+}
