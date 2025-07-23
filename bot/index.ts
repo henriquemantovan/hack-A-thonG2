@@ -238,7 +238,7 @@ bot.on('callback_query', async (query) => {
 
       const keyboard = {
         inline_keyboard: products.map(product => [
-          { text: `${product.name} - R$ ${product.price.toFixed(2)}`, callback_data: `product_${product.id}` }
+          { text: `${product.name} por ${product.price.toFixed(2)} TONS`, callback_data: `product_${product.id}` }
         ])
       };
 
@@ -269,12 +269,12 @@ bot.on('callback_query', async (query) => {
           where: { id: product.id_vendor }
       });
 
-      const message = `
-📦 **${product.name}**
-💰 Preço: R$ ${product.price.toFixed(2)}
-📋 Descrição: ${product.photo} 🏪 Loja: ${store?.nome_loja || 'N/A'}
+const caption = `
+📦 *${product.name}*
+💰 Preço: ${product.price.toFixed(2)} tons
+🏪 Loja: ${store?.nome_loja || 'N/A'}
 📊 Estoque: ${product.quant} unidades
-      `;
+`;
 
       const keyboard = {
         inline_keyboard: [
@@ -286,11 +286,12 @@ bot.on('callback_query', async (query) => {
           ]
         ]
       };
-
-      bot.sendMessage(chatId, message, {
+      bot.sendPhoto(chatId, product.photo, {
+        caption,
         parse_mode: 'Markdown',
         reply_markup: keyboard
       });
+
     }
 
     else if (data.startsWith('buy_')) {
@@ -328,7 +329,7 @@ bot.on('callback_query', async (query) => {
       const message = `
 🛒 **Pedido Criado!**
 📋 ID: ${order.id}
-💰 Total: R$ ${order.total.toFixed(2)}
+💰 Total: ${order.total.toFixed(2)} tons
 
 📱 **Pagamento via TON:**
 Endereço: \`${order.paymentAddress}\`
@@ -377,7 +378,7 @@ Escaneie o QR Code abaixo para pagar:
 ✅ **Pagamento Confirmado!**
 
 📋 Pedido: ${order.id}
-💰 Valor: R$ ${order.total.toFixed(2)}
+💰 Valor: ${order.total.toFixed(2)} tons
 🔗 Hash da Transação: \`${order.transactionHash}\`
 
 🎉 Obrigado pela compra!
@@ -417,7 +418,7 @@ Escaneie o QR Code abaixo para pagar:
       userOrders.forEach(order => {
         const statusEmoji = order.status === 'paid' ? '✅' : order.status === 'pending' ? '⏳' : '❌';
         message += `${statusEmoji} **${order.id}**\n`;
-        message += `💰 Total: R$ ${order.total.toFixed(2)}\n`;
+        message += `💰 Total: ${order.total.toFixed(2)} tons\n`;
         message += `📅 Data: ${order.createdAt.toLocaleDateString('pt-BR')}\n\n`;
       });
 
@@ -454,11 +455,11 @@ bot.onText(/\/meus_pedidos/, (msg) => {
   userOrders.forEach(order => {
     const statusEmoji = order.status === 'paid' ? '✅' : order.status === 'pending' ? '⏳' : '❌';
     message += `${statusEmoji} **${order.id}**\n`;
-    message += `💰 Total: R$ ${order.total.toFixed(2)}\n`;
+    message += `💰 Total: ${order.total.toFixed(2)} tons\n`;
     message += `📅 Data: ${order.createdAt.toLocaleDateString('pt-BR')}\n`;
 
     order.items.forEach(item => {
-      message += `  • ${item.productName} (${item.quantity}x) - R$ ${(item.price * item.quantity).toFixed(2)}\n`;
+      message += `  • ${item.productName} (${item.quantity}x) - ${(item.price * item.quantity).toFixed(2)} tons\n`;
     });
 
     message += '\n';
@@ -540,10 +541,10 @@ bot.on('web_app_data', async (msg) => {
     const message = `
 🛒 **Pedido Criado via Mini App!**
 📋 ID: ${order.id}
-💰 Total: R$ ${order.total.toFixed(2)}
+💰 Total: ${order.total.toFixed(2)} tons
 
 📦 **Itens:**
-${order.items.map(item => `• ${item.productName} (${item.quantity}x) - R$ ${(item.price * item.quantity).toFixed(2)}`).join('\n')}
+${order.items.map(item => `• ${item.productName} (${item.quantity}x) - ${(item.price * item.quantity).toFixed(2)}`).join('\n')} tons
 
 📱 **Pagamento via TON:**
 Endereço: \`${order.paymentAddress}\`
