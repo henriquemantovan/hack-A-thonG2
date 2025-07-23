@@ -1,0 +1,23 @@
+service: telegram-bot
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  environment:
+    BOT_TOKEN: ${env:BOT_TOKEN}
+    WEBAPP_URL: ${env:WEBAPP_URL}
+
+package:
+  include:
+    - dist/**
+
+functions:
+  webhook:
+    handler: dist/handler.webhook     # <— handler.js exporta webhook
+    events:
+      - httpApi:
+          path: /webhook
+          method: POST
