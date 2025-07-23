@@ -1,6 +1,6 @@
 {
-    "url": "<app-url>",
-    "name": "<app-name>",
+    "url": "https://hack-a-thon-g2.vercel.app/",
+    "name": "loja",
     "iconUrl": "<app-icon-url>",
     "termsOfUseUrl": "<terms-of-use-url>",
     "privacyPolicyUrl": "<privacy-policy-url>"
