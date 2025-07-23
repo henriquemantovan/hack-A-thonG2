@@ -13,6 +13,8 @@ declare global {
 
 const Home = () => {
   const router = useRouter();
+  const user = window.Telegram?.WebApp.initDataUnsafe.user;
+  const firstName = user?.first_name || "Visitante"; // Fallback caso não esteja disponível
 
   useEffect(() => {
     if (window.Telegram?.WebApp) {
@@ -77,7 +79,7 @@ const Home = () => {
               className="text-3xl font-bold mb-3 font-serif"
               style={{ color: '#5d412c' }}
             >
-              [Nome da Loja]
+              {firstName}!
             </h2>
             
             <div className="space-y-4">
