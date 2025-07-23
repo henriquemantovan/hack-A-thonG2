@@ -213,7 +213,7 @@ const Home = () => {
             />
             
             {/* Conteúdo de cadastro */}
-            <div className="relative z-10 text-center">
+            <div className="relative z-10 text-center" style={{ marginBottom: '18px' }}>
               <h1
                 className="text-2xl font-bold mb-2 font-serif"
                 style={{ color: '#5d412c' }}
@@ -326,7 +326,7 @@ const Home = () => {
             </h1>
             <h2
               className="text-2xl font-bold mb-2 font-serif"
-              style={{ color: '#5d412c' }}
+              style={{ color: '#5d412c', marginBottom: '20px' }}
             >
               {loja?.nome_loja || 'Sua Loja'}
             </h2>
@@ -338,7 +338,7 @@ const Home = () => {
                 style={{ background: '#f0ae00', border: '2px solid #f0ae00' }}
               >
                 <div className="flex items-center justify-center space-x-2">
-                  <span>📦 Cadastrar Produto</span>
+                  <span>Cadastrar Produto</span>
                 </div>
               </button>
               
@@ -348,7 +348,7 @@ const Home = () => {
                 style={{ background: '#f0ae00', border: '2px solid #f0ae00' }}
               >
                 <div className="flex items-center justify-center space-x-2">
-                  <span>🏪 Gerenciar Loja</span>
+                  <span>Gerenciar Loja</span>
                 </div>
               </button>
             </div>
