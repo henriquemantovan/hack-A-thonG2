@@ -21,3 +21,9 @@ model Product {
   quant     Int
   category  String
 }
+
+model Lojas {
+  id         String   @id
+  first_name String
+  nome_loja  String   @unique
+}

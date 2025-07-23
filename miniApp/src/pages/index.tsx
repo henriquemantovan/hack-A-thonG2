@@ -150,15 +150,6 @@ const Home = () => {
                 )}
               </div>
             )}
-
-            {!isConnected && (
-              <button
-                onClick={requestUserData}
-                className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg shadow-md transition-colors mb-4"
-              >
-                Conectar minha conta do Telegram
-              </button>
-            )}
             
             <div className="space-y-4">
               <button
