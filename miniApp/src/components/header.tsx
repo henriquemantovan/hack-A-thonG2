@@ -2,6 +2,7 @@
 
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { useTonConnect } from '../hooks/useTonConnect';
+import { Address } from 'ton';
 
 
 //ALGUEM CENTRALIZA PARA MIM PFV :(
@@ -13,7 +14,7 @@ export default function Header() {
         {connected && (
           <>
             <div>
-              <p>Wallet: {wallet}</p>
+              <p>Wallet: {Address.parse(wallet as string).toString()}</p>
               <p>Network: {network}</p>
               <p>Status: Connected</p>
             </div>
