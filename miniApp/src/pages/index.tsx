@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from '../components/Button';
 import { useRouter } from 'next/router';
 import { TelegramWebApp } from '../utils/telegram';
@@ -13,14 +13,19 @@ declare global {
 
 const Home = () => {
   const router = useRouter();
-  const user = window.Telegram?.WebApp.initDataUnsafe.user;
-  const firstName = user?.first_name || "Visitante"; // Fallback caso não esteja disponível
+  const [firstName, setFirstName] = useState("Visitante"); 
 
+  // Carrega os dados do Telegram apenas no cliente
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user) {
+      const user = window.Telegram.WebApp.initDataUnsafe.user;
+      setFirstName(user.first_name || "Visitante");
+    }
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.expand();
     }
   }, []);
+
 
   const handleButtonClick1 = () => {
     router.push('/novoproduto');
