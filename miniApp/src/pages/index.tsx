@@ -16,14 +16,16 @@ const Home = () => {
   const [user, setUser] = useState<TelegramUser | null>(null);
 
   useEffect(() => {
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.expand();
-      window.Telegram.WebApp.ready();
+    const telegramWebApp = window.Telegram?.WebApp;
+    
+    if (telegramWebApp) {
+      telegramWebApp.expand();
+      telegramWebApp.ready();
       
       // Função para tentar obter os dados do usuário
       const getUserData = () => {
-        const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
-        console.log('Telegram WebApp initDataUnsafe:', window.Telegram.WebApp.initDataUnsafe);
+        const telegramUser = telegramWebApp.initDataUnsafe?.user;
+        console.log('Telegram WebApp initDataUnsafe:', telegramWebApp.initDataUnsafe);
         console.log('Telegram User:', telegramUser);
         
         if (telegramUser) {
@@ -31,7 +33,7 @@ const Home = () => {
         } else {
           // Fallback: tentar novamente após um pequeno delay
           setTimeout(() => {
-            const retryUser = window.Telegram.WebApp.initDataUnsafe?.user;
+            const retryUser = telegramWebApp.initDataUnsafe?.user;
             if (retryUser) {
               setUser(retryUser);
             } else {
@@ -68,7 +70,8 @@ const Home = () => {
     }
     
     // Verificar se ainda está tentando carregar
-    if (window.Telegram?.WebApp) {
+    const telegramWebApp = window.Telegram?.WebApp;
+    if (telegramWebApp) {
       return 'Carregando...';
     }
     
