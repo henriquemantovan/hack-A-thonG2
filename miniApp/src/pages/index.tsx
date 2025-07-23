@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from '../components/Button';
 import { useRouter } from 'next/router';
-import { TelegramWebApp } from '../utils/telegram';
+import { TelegramWebApp, TelegramUser } from '../utils/telegram';
 
 declare global {
   interface Window {
@@ -13,10 +13,17 @@ declare global {
 
 const Home = () => {
   const router = useRouter();
+  const [user, setUser] = useState<TelegramUser | null>(null);
 
   useEffect(() => {
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.expand();
+      
+      // Obtém os dados do usuário do Telegram
+      const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
+      if (telegramUser) {
+        setUser(telegramUser);
+      }
     }
   }, []);
 
@@ -26,6 +33,14 @@ const Home = () => {
 
   const handleButtonClick2 = () => {
     router.push('/gerenciarloja');
+  };
+
+  // Função para formatar o nome da loja
+  const getStoreName = () => {
+    if (user) {
+      return `${user.first_name} (ID: ${user.id})`;
+    }
+    return 'CALMA';
   };
 
   return (
@@ -74,10 +89,10 @@ const Home = () => {
             Bem-vindo à
             </h1>
             <h2
-              className="text-3xl font-bold mb-3 font-serif"
+              className="text-2xl font-bold mb-3 font-serif break-words"
               style={{ color: '#5d412c' }}
             >
-              [Nome da Loja]
+              Loja do {getStoreName()}
             </h2>
             
             <div className="space-y-4">
