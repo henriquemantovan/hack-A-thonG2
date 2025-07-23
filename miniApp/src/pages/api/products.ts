@@ -15,10 +15,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'POST') {
-    const { name, price, photo, quant, category } = req.body
+    const { name, price, photo, quant, category, nome_loja } = req.body
 
-    if (!name || !price || !quant || !category) {
-      return res.status(400).json({ error: 'Todos os campos são obrigatórios' })
+    if (!name || !price || !quant || !category || !nome_loja) {
+      return res.status(400).json({ error: 'Todos os campos são obrigatórios, incluindo nome_loja' })
     }
 
     if (!photo) {
@@ -32,7 +32,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           price: parseFloat(price),
           photo, 
           quant: parseInt(quant),
-          category
+          category,
+          nome_loja 
         }
       })
       return res.status(201).json(newProduct)
@@ -43,9 +44,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'PUT') {
-    const { id, name, price, photo, quant, category } = req.body
+    const { id, name, price, photo, quant, category, nome_loja } = req.body
 
-    if (!id || !name || !price || !quant || !category) {
+    if (!id || !name || !price || !quant || !category || !nome_loja) {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios' })
     }
 
@@ -65,7 +66,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           price: parseFloat(price),
           photo: photo || existingProduct.photo, 
           quant: parseInt(quant),
-          category
+          category,
+          nome_loja 
         }
       })
       

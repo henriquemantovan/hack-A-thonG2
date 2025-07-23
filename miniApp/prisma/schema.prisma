@@ -20,6 +20,7 @@ model Product {
   photo     String   // caminho ou URL da foto
   quant     Int
   category  String
+  nome_loja String   
 }
 
 model Lojas {

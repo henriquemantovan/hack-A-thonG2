@@ -1,6 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Button from '../components/Button';
+
+interface UserData {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  chatId: string;
+}
+
+interface Loja {
+  id: string;
+  first_name: string;
+  nome_loja: string;
+}
 
 const CadastrarProduto = () => {
   const router = useRouter();
@@ -13,6 +26,77 @@ const CadastrarProduto = () => {
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [showSuccess, setShowSuccess] = useState(false);
+  const [userData, setUserData] = useState<UserData>({
+    userId: '',
+    firstName: 'Visitante',
+    lastName: '',
+    chatId: ''
+  });
+  const [loja, setLoja] = useState<Loja | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+
+  // Carrega os dados do usuário e da loja
+  useEffect(() => {
+    const loadUserData = async () => {
+      // Primeiro, tenta pegar dos parâmetros da URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const userIdFromUrl = urlParams.get('user_id');
+      const firstNameFromUrl = urlParams.get('first_name');
+      const lastNameFromUrl = urlParams.get('last_name');
+      const chatIdFromUrl = urlParams.get('chat_id');
+
+      let currentUserId = '';
+
+      if (userIdFromUrl && firstNameFromUrl) {
+        const newUserData = {
+          userId: userIdFromUrl,
+          firstName: firstNameFromUrl,
+          lastName: lastNameFromUrl || '',
+          chatId: chatIdFromUrl || ''
+        };
+        setUserData(newUserData);
+        currentUserId = userIdFromUrl;
+      } else if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user) {
+        // Fallback: tenta pegar do Telegram WebApp
+        const user = window.Telegram.WebApp.initDataUnsafe.user;
+        const chat = window.Telegram.WebApp.initDataUnsafe.chat;
+        
+        const newUserData = {
+          userId: user.id.toString(),
+          firstName: user.first_name || "Visitante",
+          lastName: user.last_name || '',
+          chatId: chat?.id.toString() || ''
+        };
+        setUserData(newUserData);
+        currentUserId = user.id.toString();
+      }
+
+      // Busca a loja do usuário
+      if (currentUserId) {
+        try {
+          const response = await fetch('/api/lojas');
+          const lojas: Loja[] = await response.json();
+          
+          const userStore = lojas.find(loja => loja.id === currentUserId);
+          
+          if (userStore) {
+            setLoja(userStore);
+          } else {
+            // Se não encontrou a loja, redireciona para a página inicial
+            router.push('/');
+            return;
+          }
+        } catch (error) {
+          console.error('Erro ao buscar loja do usuário:', error);
+          setErrors({ general: 'Erro ao carregar dados da loja' });
+        }
+      }
+
+      setIsLoadingUser(false);
+    };
+
+    loadUserData();
+  }, [router]);
 
   const uploadImage = async (file: File): Promise<string> => {
     const formData = new FormData();
@@ -53,6 +137,10 @@ const CadastrarProduto = () => {
     if (!categoria.trim()) {
       newErrors.categoria = 'A categoria é obrigatória';
     }
+
+    if (!loja?.nome_loja) {
+      newErrors.general = 'Erro: Nome da loja não encontrado. Tente novamente.';
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -67,7 +155,6 @@ const CadastrarProduto = () => {
     setErrors({});
     
     try {
-      
       let imageUrl = 'https://res.cloudinary.com/drjnqkj8o/image/upload/v1753067071/produtos/jxrjkvoveztlcnhpggxs.png'; 
       
       if (imagem) {
@@ -84,7 +171,8 @@ const CadastrarProduto = () => {
           price: parseFloat(preco.replace(',', '.')),
           quant: parseInt(quant),
           category: categoria,
-          photo: imageUrl
+          photo: imageUrl,
+          nome_loja: loja?.nome_loja 
         })
       });
 
@@ -118,6 +206,18 @@ const CadastrarProduto = () => {
   const handleGoBack = () => {
     router.back();
   };
+
+  // Loading enquanto carrega os dados do usuário
+  if (isLoadingUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#feebb3' }}>
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-800 mb-4"></div>
+          <p className="text-amber-900 font-bold">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ background: '#feebb3' }}>
@@ -154,7 +254,7 @@ const CadastrarProduto = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-green-700">Produto cadastrado com sucesso!</h3>
-                    <p className="text-green-600">O produto foi adicionado ao seu estoque.</p>
+                    <p className="text-green-600">O produto foi adicionado ao estoque da {loja?.nome_loja}.</p>
                   </div>
                 </div>
               </div>
@@ -184,7 +284,7 @@ const CadastrarProduto = () => {
               Cadastrar Produto
             </h2>
             <p className="text-amber-700 bg-white bg-opacity-60 rounded-lg p-2 inline-block shadow-inner" style={{ color: '#5d412c' }}>
-              Adicione novos produtos ao seu estoque
+              Adicione novos produtos ao estoque da <strong>{loja?.nome_loja}</strong>
             </p>
           </div>
 
