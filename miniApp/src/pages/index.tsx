@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import Button from '../components/Button';
 import { useRouter } from 'next/router';
 import { TelegramWebApp } from '../utils/telegram';
+import TonConnect from '@tonconnect/sdk';
+import { TonConnectButton } from '@tonconnect/ui-react';
 
 declare global {
   interface Window {
@@ -177,6 +179,9 @@ const Home = () => {
   // Tela de cadastro de loja
   if (hasStore === false) {
     return (
+      
+
+      
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-200 via-blue-100 to-indigo-200 p-4"
         style={{ background: '#0d97ac' }}
       >
@@ -330,7 +335,6 @@ const Home = () => {
             >
               {loja?.nome_loja || 'Sua Loja'}
             </h2>
-            
             <div className="space-y-4">
               <button
                 onClick={handleButtonClick1}
