@@ -9,15 +9,18 @@ export default function ItemPage() {
   const { itemValue, loading, error } = useStoreContract(itemId ?? BigInt(0));
 
   // Função que seta o itemId ao clicar no botão
-  function handleFetchItem() {
-    if (inputId.trim() === "") return;
-    try {
-      const idBigInt = BigInt(inputId.trim());
-      setItemId(idBigInt);
-    } catch {
-      alert("ID inválido");
-    }
+function handleFetchItem() {
+  alert("Botão clicado!"); // Alerta ao clicar
+
+  if (inputId.trim() === "") return;
+  try {
+    const idBigInt = BigInt(inputId.trim());
+    setItemId(idBigInt);
+  } catch {
+    alert("ID inválido");
   }
+}
+
 
   return (
     <div style={{ padding: "1rem" }}>
@@ -32,6 +35,7 @@ export default function ItemPage() {
           style={{ marginRight: "0.5rem" }}
         />
         <button onClick={handleFetchItem}>Buscar Item</button>
+       
       </div>
 
       {loading && <p>Carregando...</p>}
