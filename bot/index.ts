@@ -90,8 +90,22 @@ async function generatePaymentQR(address: string, amount: number): Promise<Buffe
 // Comandos do bot
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
+  const userId = msg.from?.id;
+  const firstName = msg.from?.first_name;
+  const lastName = msg.from?.last_name;
+  
+  // Criar URL com parâmetros do usuário
+  const userParams = new URLSearchParams({
+    user_id: userId?.toString() || '',
+    first_name: firstName || '',
+    last_name: lastName || '',
+    chat_id: chatId.toString()
+  });
+  
+  const miniAppUrl = `${WEBAPP_URL}?${userParams.toString()}`;
+  
   const welcomeMessage = `
-🛒 **Bem-vindo ao TON E-Commerce!**
+🛒 **Bem-vindo ao TON E-Commerce, ${firstName}!**
 
 Escolha uma opção abaixo:
 
@@ -104,7 +118,7 @@ Escolha uma opção abaixo:
     inline_keyboard: [
       [
         { text: '🏪 Ver Lojas', callback_data: 'list_stores' },
-        { text: '📱 Mini App', web_app: { url: WEBAPP_URL } }
+        { text: '📱 Mini App', web_app: { url: miniAppUrl } }
       ],
       [
         { text: '🛍️ Meus Pedidos', callback_data: 'my_orders' }
@@ -403,14 +417,27 @@ bot.onText(/\/meus_pedidos/, (msg) => {
   });
 });
 
-// Comando para abrir Mini App
+// Comando para abrir Mini App MODIFIQUEI
 bot.onText(/\/app/, (msg) => {
   const chatId = msg.chat.id;
+  const userId = msg.from?.id;
+  const firstName = msg.from?.first_name;
+  const lastName = msg.from?.last_name;
+  
+  // Criar URL com parâmetros do usuário
+  const userParams = new URLSearchParams({
+    user_id: userId?.toString() || '',
+    first_name: firstName || '',
+    last_name: lastName || '',
+    chat_id: chatId.toString()
+  });
+  
+  const miniAppUrl = `${WEBAPP_URL}?${userParams.toString()}`;
   
   const keyboard = {
     inline_keyboard: [
       [
-        { text: '📱 Abrir Mini App', web_app: { url: WEBAPP_URL } }
+        { text: '📱 Abrir Mini App', web_app: { url: miniAppUrl } }
       ]
     ]
   };

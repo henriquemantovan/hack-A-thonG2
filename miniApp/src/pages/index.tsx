@@ -224,7 +224,7 @@ const Home = () => {
                 className="text-lg font-bold mb-6 font-serif"
                 style={{ color: '#5d412c' }}
               >
-                Vamos criar sua loja?
+                Vamos cadastrar sua loja?
               </h2>
 
               {/* Campo para nome da loja */}
@@ -262,22 +262,10 @@ const Home = () => {
               >
                 <div className="flex items-center justify-center space-x-2">
                   <span>
-                    {isCreatingStore ? '⏳ Criando...' : '🏪 Criar Minha Loja'}
+                    {isCreatingStore ? 'Criando...' : 'Criar Minha Loja'}
                   </span>
                 </div>
               </button>
-
-              {/* Informações do usuário */}
-              {isConnected && (
-                <div className="mt-4 p-3 bg-white bg-opacity-50 rounded-lg">
-                  <p className="text-xs font-medium" style={{ color: '#5d412c' }}>
-                    👤 ID: {userData.userId}
-                  </p>
-                  <p className="text-xs" style={{ color: '#5d412c' }}>
-                    💬 Chat: {userData.chatId}
-                  </p>
-                </div>
-              )}
             </div>
             
             <div className="absolute -bottom-2 left-0 right-0 h-6 bg-gradient-to-b from-amber-600 to-amber-800 rounded-b-lg z-10" 
@@ -342,29 +330,6 @@ const Home = () => {
             >
               {loja?.nome_loja || 'Sua Loja'}
             </h2>
-            <p
-              className="text-lg font-semibold mb-4 font-serif"
-              style={{ color: '#5d412c' }}
-            >
-              Olá, {userData.firstName}!
-            </p>
-
-            {/* Informações do usuário */}
-            {isConnected && (
-              <div className="mb-4 p-3 bg-white bg-opacity-50 rounded-lg">
-                <p className="text-sm font-medium" style={{ color: '#5d412c' }}>
-                  👤 ID: {userData.userId}
-                </p>
-                <p className="text-sm" style={{ color: '#5d412c' }}>
-                  💬 Chat: {userData.chatId}
-                </p>
-                {userData.lastName && (
-                  <p className="text-sm" style={{ color: '#5d412c' }}>
-                    📝 Nome completo: {userData.firstName} {userData.lastName}
-                  </p>
-                )}
-              </div>
-            )}
             
             <div className="space-y-4">
               <button
@@ -387,25 +352,6 @@ const Home = () => {
                 </div>
               </button>
             </div>
-
-            {/* Botão para testar envio de dados de volta */}
-            {isConnected && (
-              <button
-                onClick={() => {
-                  if (window.Telegram?.WebApp) {
-                    window.Telegram.WebApp.sendData(JSON.stringify({
-                      action: "user_info_test",
-                      userData: userData,
-                      loja: loja,
-                      timestamp: new Date().toISOString()
-                    }));
-                  }
-                }}
-                className="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg shadow-md transition-colors text-sm"
-              >
-                🔄 Enviar dados para o bot
-              </button>
-            )}
           </div>
           
           <div className="absolute -bottom-2 left-0 right-0 h-6 bg-gradient-to-b from-amber-600 to-amber-800 rounded-b-lg z-10" 
