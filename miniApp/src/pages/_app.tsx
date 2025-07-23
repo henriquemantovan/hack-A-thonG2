@@ -6,7 +6,7 @@ import Header from '../components/header';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <TonConnectUIProvider manifestUrl="http://localhost:3000/tonconnect-manifest.json">
+    <TonConnectUIProvider manifestUrl="https://hack-a-thon-g2.vercel.app/tonconnect-manifest.json">
       <Header />
       <Component {...pageProps} />
     </TonConnectUIProvider>
