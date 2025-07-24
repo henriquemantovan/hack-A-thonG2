@@ -40,6 +40,7 @@ export function useStoreContract(itemId: bigint) {
                 setItemValue(value);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'ERRO');
+                alert("erro");
                 console.error("ERRO", err);
             } finally {
                 setLoading(false);
