@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
 datasource db {
@@ -31,6 +30,7 @@ model Lojas {
   id         String   @id
   first_name String
   nome_loja  String   @unique
+  address    String
 }
 
 model Order {

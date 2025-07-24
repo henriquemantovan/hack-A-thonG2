@@ -5,6 +5,7 @@ import 'dotenv/config';
 import { PrismaClient } from '@prisma/client'; // Import PrismaClient
 import QRCode from 'qrcode';
 import crypto from 'crypto';
+import { generateBuyItemLink } from "./generateBuyItemLink";
 
 const BOT_TOKEN  = process.env.BOT_TOKEN!;
 const WEBAPP_URL = process.env.WEBAPP_URL!;
@@ -44,57 +45,62 @@ async function generatePaymentQR(address: string, amount: number): Promise<Buffe
   return await QRCode.toBuffer(tonUrl);
 }
 
+async function generatePaymentLink(address: string, amount: number): Promise<string> {
+    const tonUrl = `ton://transfer/${address}?amount=${amount * 10000000000}`; // TON usa nano-tons
+    return tonUrl;
+  }
+
 // Função para salvar pedido no banco de dados
 async function saveOrderToDatabase(tempOrder: TempOrder): Promise<void> {
-  try {
-    await prisma.order.create({
-      data: {
-        id: tempOrder.id,
-        userId: BigInt(tempOrder.userId),
-        total: tempOrder.total,
-        status: tempOrder.status,
-        paymentAddress: tempOrder.paymentAddress,
-        transactionHash: tempOrder.transactionHash,
-        createdAt: tempOrder.createdAt,
-        items: {
-          create: tempOrder.items.map(item => ({
-            productId: item.productId,
-            productName: item.productName,
-            quantity: item.quantity,
-            price: item.price
-          }))
+    try {
+      await prisma.order.create({
+        data: {
+          id: tempOrder.id,
+          userId: BigInt(tempOrder.userId),
+          total: tempOrder.total,
+          status: tempOrder.status,
+          paymentAddress: tempOrder.paymentAddress,
+          transactionHash: tempOrder.transactionHash,
+          createdAt: tempOrder.createdAt,
+          items: {
+            create: tempOrder.items.map(item => ({
+              productId: item.productId,
+              productName: item.productName,
+              quantity: item.quantity,
+              price: item.price
+            }))
+          }
+        },
+        include: {
+          items: true
         }
-      },
-      include: {
-        items: true
-      }
-    });
-    console.log(`✅ Pedido ${tempOrder.id} salvo no banco de dados`);
-  } catch (error) {
-    console.error('❌ Erro ao salvar pedido no banco:', error);
-    throw error;
+      });
+      console.log(`✅ Pedido ${tempOrder.id} salvo no banco de dados`);
+    } catch (error) {
+      console.error('❌ Erro ao salvar pedido no banco:', error);
+      throw error;
+    }
   }
-}
 
 // Função para atualizar estoque do produto
-async function updateProductStock(productId: string, quantity: number): Promise<boolean> {
-  try {
-    await prisma.product.update({
-      where: { id: productId },
-      data: {
-        quant: {
-          decrement: quantity
+ async function updateProductStock(productId: string, quantity: number): Promise<boolean> {
+    try {
+      await prisma.product.update({
+        where: { id: productId },
+        data: {
+          quant: {
+            decrement: quantity
+          }
         }
-      }
-    });
+      });
 
-    console.log(`✅ Estoque do produto ${productId} atualizado. Quantidade reduzida em ${quantity}`);
-    return true;
-  } catch (error) {
-    console.error('❌ Erro ao atualizar estoque:', error);
-    return false;
+      console.log(`✅ Estoque do produto ${productId} atualizado. Quantidade reduzida em ${quantity}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Erro ao atualizar estoque:', error);
+      return false;
+    }
   }
-}
 
 // Handler /start com log e await
 bot.onText(/\/start/, async (msg) => {
@@ -228,7 +234,7 @@ bot.on('callback_query', async (query) => {
             [{ text: '🔙 Voltar às Lojas', callback_data: 'list_stores' }]
           ]
         };
-        bot.sendMessage(chatId, message, {
+       await bot.sendMessage(chatId, message, {
           parse_mode: 'Markdown',
           reply_markup: keyboard
         });
@@ -261,7 +267,7 @@ bot.on('callback_query', async (query) => {
       });
 
       if (!product) {
-        bot.sendMessage(chatId, 'Produto não encontrado.');
+       await bot.sendMessage(chatId, 'Produto não encontrado.');
         return;
       }
 
@@ -295,125 +301,153 @@ bot.on('callback_query', async (query) => {
       });
     }
 
-    else if (data.startsWith('buy_')) {
-      const productId = data.replace('buy_', '');
-      const product = await prisma.product.findUnique({ // Fetch product from DB
-        where: { id: productId }
-      });
+   else if (data.startsWith('buy_')) {
+    const productId = data.replace('buy_', '');
+    const product = await prisma.product.findUnique({ // Fetch product from DB 
+      where: { id: productId }
+    });
 
-      if (!product) {
-        bot.sendMessage(chatId, 'Produto não encontrado.');
-        return;
-      }
+    
+    if (!product) {
+    await  bot.sendMessage(chatId, 'Produto não encontrado.');
+      return;
+    }
+  // ADD AQ 
+    const store = await prisma.lojas.findUnique({
+      where: { id: product.id_vendor }
+    });
 
-      // Create temporary order
-      const order: TempOrder = {
-        id: crypto.randomUUID(),
-        userId: query.from.id,
-        items: [{
-          productId: product.id,
-          productName: product.name,
-          quantity: 1,
-          price: product.price.toNumber() // Convert Decimal to number
-        }],
-        total: product.price.toNumber(), // Convert Decimal to number
-        status: 'pending',
-        paymentAddress: generateTonAddress(),
-        createdAt: new Date()
-      };
-
-      tempOrders.push(order);
-
-      // Gerar QR Code
-      const qrBuffer = await generatePaymentQR(order.paymentAddress!, order.total);
-
-      const message = `
-🛒 **Pedido Criado!**
-📋 ID: ${order.id}
-💰 Total: ${order.total.toFixed(2)} tons
-
-📱 **Pagamento via TON:**
-Endereço: \`${order.paymentAddress}\`
-Valor: ${order.total} TON
-
-Escaneie o QR Code abaixo para pagar:
-      `;
-
-      const keyboard = {
-        inline_keyboard: [
-          [
-            { text: '✅ Confirmar Pagamento', callback_data: `confirm_payment_${order.id}` }
-          ],
-          [
-            { text: '❌ Cancelar Pedido', callback_data: `cancel_order_${order.id}` }
-          ]
-        ]
-      };
-
-      await bot.sendPhoto(chatId, qrBuffer, {
-        caption: message,
-        parse_mode: 'Markdown',
-        reply_markup: keyboard
-      });
+    if (!store || !store.address) { 
+     await bot.sendMessage(chatId, 'Não foi possível encontrar o endereço de pagamento da loja para este produto.');
+      return;
     }
 
-    else if (data.startsWith('confirm_payment_')) {
-      const orderId = data.replace('confirm_payment_', '');
-      const order = tempOrders.find(o => o.id === orderId);
+    // Create temporary order
+    const order: TempOrder = {
+      id: crypto.randomUUID(),
+      userId: query.from.id,
+      items: [{
+        productId: product.id,
+        productName: product.name,
+        quantity: 1,
+        price: product.price.toNumber() // Convert Decimal to number
+      }],
+      total: product.price.toNumber(), // Convert Decimal to number
+      status: 'pending',
+      paymentAddress: store.address, // MUDEI AQ 
+      createdAt: new Date()
+    };
 
-      if (!order) {
-        await bot.sendMessage(chatId, 'Pedido não encontrado.');
-        return;
-      }
+    tempOrders.push(order);
 
-      if (order.status !== 'pending') {
-        await bot.sendMessage(chatId, 'Este pedido já foi processado.');
-        return;
-      }
+    
 
-      try {
-        // Simular confirmação de pagamento (em produção, verificar blockchain)
-        order.status = 'paid';
-        order.transactionHash = crypto.randomBytes(32).toString('hex');
 
-        // Atualizar estoque de todos os produtos do pedido
-        for (const item of order.items) {
-          const stockUpdated = await updateProductStock(item.productId, item.quantity);
-          if (!stockUpdated) {
-            console.log(`⚠️ Aviso: Erro ao atualizar estoque do produto ${item.productName}`);
-          }
-        }
+        // Gerar QR Code
+        const paymentlink = await generateBuyItemLink(Number(product.id), order.total)
 
-        // Salvar pedido no banco de dados
-        await saveOrderToDatabase(order);
+        const qrBuffer = await QRCode.toBuffer(paymentlink);
+        const message = `
+        🛒 *Pedido Criado!*
+        📋 ID: ${(order.id)}
+        💰 Total: ${order.total.toFixed(2)} tons
 
-        // Remover da lista temporária
-        const index = tempOrders.findIndex(o => o.id === orderId);
-        if (index !== -1) {
-          tempOrders.splice(index, 1);
-        }
+        📱 *Pagamento via TON:*
+        Endereço: \`${(order.paymentAddress!)}\`
+        Valor: ${order.total} TON
 
-        const confirmMessage = `
-✅ **Pagamento Confirmado!**
+        🔗 [Pagar com Tonkeeper](${paymentlink})
 
-📋 Pedido: ${order.id}
-💰 Valor: ${order.total.toFixed(2)} tons
-🔗 Hash da Transação: \`${order.transactionHash}\`
-
-🎉 Obrigado pela compra!
+        Escaneie o QR Code abaixo para pagar:
         `;
 
-        await bot.sendMessage(chatId, confirmMessage, {
-          parse_mode: 'Markdown'
-        });
+        const keyboard = {
+          inline_keyboard: [
+            [
+              { text: '✅ Confirmar Pagamento', callback_data: `confirm_payment_${order.id}` }
+            ],
+            [
+              { text: '❌ Cancelar Pedido', callback_data: `cancel_order_${order.id}` }
+            ]
+          ]
+        };
 
-        // Notificar vendedor (se implementado)
-        // notifyVendor(order);
-      } catch (error) {
-        console.error('Erro ao confirmar pagamento:', error);
-       await bot.sendMessage(chatId, '❌ Erro ao processar pagamento. Tente novamente.');
+
+    const keyboardwithpayment = {
+      inline_keyboard: [
+
+        [
+          { text: '✅ Confirmar Pagamento', callback_data: `confirm_payment_${order.id}` }
+        ],
+        [
+          { text: '❌ Cancelar Pedido', callback_data: `cancel_order_${order.id}` }
+        ]
+      ]
+    };
+
+  await bot.sendPhoto(chatId, qrBuffer, {
+      caption: message,
+      parse_mode: 'Markdown',
+      reply_markup: keyboardwithpayment
+    });
+  }
+
+     else if (data.startsWith('confirm_payment_')) {
+        const orderId = data.replace('confirm_payment_', '');
+        const order = tempOrders.find(o => o.id === orderId);
+
+        if (!order) {
+        await bot.sendMessage(chatId, 'Pedido não encontrado.');
+          return;
+        }
+
+        if (order.status !== 'pending') {
+         await bot.sendMessage(chatId, 'Este pedido já foi processado.');
+          return;
+        }
+
+        try {
+          // Simular confirmação de pagamento (em produção, verificar blockchain)
+          order.status = 'paid';
+          order.transactionHash = crypto.randomBytes(32).toString('hex');
+
+          // Atualizar estoque de todos os produtos do pedido
+          for (const item of order.items) {
+            const stockUpdated = await updateProductStock(item.productId, item.quantity);
+            if (!stockUpdated) {
+              console.log(`⚠️ Aviso: Erro ao atualizar estoque do produto ${item.productName}`);
+            }
+          }
+
+          // Salvar pedido no banco de dados
+          await saveOrderToDatabase(order);
+
+          // Remover da lista temporária
+          const index = tempOrders.findIndex(o => o.id === orderId);
+          if (index !== -1) {
+            tempOrders.splice(index, 1);
+          }
+
+          const confirmMessage = `
+  ✅ **Pagamento Confirmado!**
+
+  📋 Pedido: ${order.id}
+  💰 Valor: ${order.total.toFixed(2)} tons
+
+  🎉 Obrigado pela compra!
+          `;
+
+        await bot.sendMessage(chatId, confirmMessage, {
+            parse_mode: 'Markdown'
+          });
+
+          // Notificar vendedor (se implementado)
+          // notifyVendor(order);
+        } catch (error) {
+          console.error('Erro ao confirmar pagamento:', error);
+         await bot.sendMessage(chatId, '❌ Erro ao processar pagamento. Tente novamente.');
+        }
       }
-    }
 
     else if (data.startsWith('cancel_order_')) {
       const orderId = data.replace('cancel_order_', '');
@@ -479,7 +513,6 @@ Escaneie o QR Code abaixo para pagar:
    await bot.answerCallbackQuery(query.id);
   } catch (error) {
     console.error('Erro no callback query:', error);
-   await bot.sendMessage(chatId, 'Ocorreu um erro. Tente novamente.');
    await bot.answerCallbackQuery(query.id);
   }
 });
@@ -566,78 +599,78 @@ bot.onText(/\/app/, async(msg) => {
 });
 
 // Manipular dados do WebApp
-bot.on('web_app_data', async (msg) => {
-  const chatId = msg.chat.id;
-  const userId = msg.from?.id;
+ bot.on('web_app_data', async (msg) => {
+    const chatId = msg.chat.id;
+    const userId = msg.from?.id;
 
-  const webApp = msg.web_app_data;
-  if (!webApp || !webApp.data) {
-    // nada a fazer se não veio payload
-    return;
-  }
+    const webApp = msg.web_app_data;
+    if (!webApp || !webApp.data) {
+      // nada a fazer se não veio payload
+      return;
+    }
 
-  if (!userId) return;
+    if (!userId) return;
 
-  try {
-    const orderData = JSON.parse(webApp.data);
+    try {
+      const orderData = JSON.parse(webApp.data);
 
-    // Create temporary order from WebApp data
-    const order: TempOrder = {
-      id: crypto.randomUUID(),
-      userId: userId,
-      items: orderData.items.map((item: any) => ({
-        productId: item.product.id,
-        productName: item.product.name,
-        quantity: item.quantity,
-        price: item.product.price
-      })),
-      total: orderData.total,
-      status: 'pending',
-      paymentAddress: generateTonAddress(),
-      createdAt: new Date()
-    };
+      // Create temporary order from WebApp data
+      const order: TempOrder = {
+        id: crypto.randomUUID(),
+        userId: userId,
+        items: orderData.items.map((item: any) => ({
+          productId: item.product.id,
+          productName: item.product.name,
+          quantity: item.quantity,
+          price: item.product.price
+        })),
+        total: orderData.total,
+        status: 'pending',
+        paymentAddress: generateTonAddress(),
+        createdAt: new Date()
+      };
 
-    tempOrders.push(order);
+      tempOrders.push(order);
 
-    // Gerar QR Code
-    const qrBuffer = await generatePaymentQR(order.paymentAddress!, order.total);
+      // Gerar QR Code
+      const qrBuffer = await generatePaymentQR(order.paymentAddress!, order.total);
 
-    const message = `
-🛒 **Pedido Criado via Mini App!**
-📋 ID: ${order.id}
-💰 Total: ${order.total.toFixed(2)} tons
+      const message = `
+  🛒 **Pedido Criado via Mini App!**
+  📋 ID: ${order.id}
+  💰 Total: ${order.total.toFixed(2)} tons
 
-📦 **Itens:**
-${order.items.map(item => `• ${item.productName} (${item.quantity}x) - ${(item.price * item.quantity).toFixed(2)} tons`).join('\n')}
+  📦 **Itens:**
+  ${order.items.map(item => `• ${item.productName} (${item.quantity}x) - ${(item.price * item.quantity).toFixed(2)} tons`).join('\n')}
 
-📱 **Pagamento via TON:**
-Endereço: \`${order.paymentAddress}\`
-Valor: ${order.total} TON
+  📱 **Pagamento via TON:**
+  Endereço: \`${order.paymentAddress}\`
+  Valor: ${order.total} TON
 
-Escaneie o QR Code abaixo para pagar:
-    `;
+  Escaneie o QR Code abaixo para pagar:
+      `;
 
-    const keyboard = {
-      inline_keyboard: [
-        [
-          { text: '✅ Confirmar Pagamento', callback_data: `confirm_payment_${order.id}` }
-        ],
-        [
-          { text: '❌ Cancelar Pedido', callback_data: `cancel_order_${order.id}` }
+      const keyboard = {
+        inline_keyboard: [
+          [
+            { text: '✅ Confirmar Pagamento', callback_data: `confirm_payment_${order.id}` }
+          ],
+          [
+            { text: '❌ Cancelar Pedido', callback_data: `cancel_order_${order.id}` }
+          ]
         ]
-      ]
-    };
+      };
 
-   await bot.sendPhoto(chatId, qrBuffer, {
-      caption: message,
-      parse_mode: 'Markdown',
-      reply_markup: keyboard
-    });
-  } catch (error) {
-    console.error('Erro ao processar dados do WebApp:', error);
-   await bot.sendMessage(chatId, 'Erro ao processar pedido. Tente novamente.');
-  }
-});
+    await bot.sendPhoto(chatId, qrBuffer, {
+        caption: message,
+        parse_mode: 'Markdown',
+        reply_markup: keyboard
+      });
+    } catch (error) {
+      console.error('Erro ao processar dados do WebApp:', error);
+     await bot.sendMessage(chatId, 'Erro ao processar pedido. Tente novamente.');
+    }
+  });
 
 
 // Aqui você re-cole todos os outros bot.onText e bot.on('callback_query')...
@@ -654,7 +687,7 @@ export const webhook = async (
   console.log('🚀 [webhook] processando update…');
   await bot.processUpdate(update);
   console.log('✅ [webhook] processUpdate finalizado');
-  await new Promise((resolve) => setTimeout(resolve, 200));
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
   return { statusCode: 200, body: '' };
 };
