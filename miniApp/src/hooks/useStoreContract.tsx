@@ -42,7 +42,7 @@ export function useStoreContract(itemId: bigint) {
                 setError(null);
                 console.log(storeContract);
                 await sleep(5000);
-                const value = (await storeContract.getGetItem);
+                const value = await storeContract.getGetStoreId;
 
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'ERRO');
