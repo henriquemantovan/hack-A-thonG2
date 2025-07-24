@@ -21,6 +21,8 @@ const CadastrarProduto = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showSuccess, setShowSuccess] = useState(false);
   const { sender } = useTonConnect();
+  const { itemValue, loading, error, storeContract, getItemMax } = useStoreContract(0n);
+
 
   const uploadImage = async (file: File): Promise<string> => {
     const formData = new FormData();
@@ -69,8 +71,7 @@ const CadastrarProduto = () => {
   const handleCadastrar = async () => {
     if (!validateFields() || typeof userId !== 'string') return;
 
-    const { itemValue, loading, error, storeContract, getItemMax } = useStoreContract(0n);
-    const { sender } = useTonConnect();
+
     setUploading(true);
     setErrors({});
 
