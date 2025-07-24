@@ -30,6 +30,8 @@ export function useStoreContract(itemId: bigint) {
 
     useEffect(() => {
         async function fetchItem() {
+            if(!storeContract)
+                    alert("erro no contrato");
             if (!storeContract || !itemId) return;
             
             try {
