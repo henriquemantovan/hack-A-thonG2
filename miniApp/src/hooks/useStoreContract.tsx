@@ -14,6 +14,7 @@ export function useStoreContract(itemId: bigint) {
     const [itemValue, setItemValue] = useState<Item | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [itemMax, setItemMax] = useState<string | null>(null);
 
     const storeContract = useAsyncInitialize<OpenedContract<TactStore> | null>(async () => {
         if (!client) return null;
@@ -80,12 +81,24 @@ export function useStoreContract(itemId: bigint) {
         );
     };
 
+    const getItemMax = async (): Promise<bigint | null> => {
+        try {
+            const max = await storeContract?.getGetItemCount();
+            return max ?? null;
+        } catch (err) {
+            console.error("Erro ao buscar itemMax:", err);
+            return null;
+        }
+    };
+
+
     return {
         itemValue,
         loading,
         error,
         storeContract,
         sendAddItem,
+        getItemMax,
     };
     }
 
