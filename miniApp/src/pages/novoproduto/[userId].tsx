@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Button from '../../components/Button';
+import { useStoreContract } from '../../hooks/useStoreContract'; // Supondo que você tenha uma função para adicionar item ao contrato
+import { createHash } from 'crypto';
+
+
 
 const CadastrarProduto = () => {
   const router = useRouter();
@@ -62,6 +66,8 @@ const CadastrarProduto = () => {
   const handleCadastrar = async () => {
     if (!validateFields() || typeof userId !== 'string') return;
 
+    const { storeContract } = useStoreContract(0n); // 0n temporário
+
     setUploading(true);
     setErrors({});
 
@@ -72,12 +78,24 @@ const CadastrarProduto = () => {
         imageUrl = await uploadImage(imagem);
       }
 
+      const precoNumerico = parseFloat(preco.replace(',', '.')) % 1000000000;
+      const quantNumerico = parseInt(quant);
+
+      const itemCount = await storeContract?.getGetItemCount(); 
+      const nextItemId = itemCount ? itemCount + 1n : 1n;
+
+      const { sendAddItem } = useStoreContract(nextItemId);
+
+      await sendAddItem(precoNumerico, quantNumerico);
+
+
       const res = await fetch('/api/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          id: nextItemId.toString(),
           name: nome,
           price: parseFloat(preco.replace(',', '.')),
           quant: parseInt(quant),

@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'POST') {
-    const { name, price, quant, category, photo, id_vendor } = req.body;
+    const { id, name, price, quant, category, photo, id_vendor } = req.body;
 
     if (!name || !price || !quant || !category) {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios' })
@@ -32,6 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const newProduct = await prisma.product.create({
         data: {
+          id,
           name,
           price: parseFloat(price),
           photo, 
