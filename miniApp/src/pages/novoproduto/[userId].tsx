@@ -86,7 +86,7 @@ const CadastrarProduto = () => {
       const quantNumerico = parseInt(quant);
 
       const itemCount = await getItemMax();
-      const nextItemId = itemCount ? itemCount + 1n : 1n;
+      const nextItemId = itemCount ? itemCount: 0n;
 
 
 
