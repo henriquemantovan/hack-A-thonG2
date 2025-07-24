@@ -1,4 +1,4 @@
-# hack-A-thonG2
+# MarkeTON
 
 ### Problema central
 
@@ -62,12 +62,12 @@ Vale apontar que, devido à sua arquitetura versátil, o sistema pode ser aplica
 
 ---
 
-### Instalação e Execução
+### Instalação e Execução do Miniapp
 
 1. Clone o repositório:
    ```bash
    git clone https://github.com/henriquemantovan/hack-A-thonG2.git
-   cd hack-A-thonG2
+   cd hack-A-thonG2/miniApp
    ```
 2. Instale as dependências:
    ```bash
@@ -77,10 +77,33 @@ Vale apontar que, devido à sua arquitetura versátil, o sistema pode ser aplica
    ```bash
    npm run dev
    ```
-4. Acesse a aplicação em [http://localhost:5173](http://localhost:5173)
+4. Acesse a aplicação em [http://localhost:3000](http://localhost:3000)
 
 ---
 
+### Instalação e Execução do Bot
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/henriquemantovan/hack-A-thonG2.git
+   cd hack-A-thonG2/bot
+   ```
+2. Instale as dependências:
+   ```bash
+   npm install
+   ```
+3. Inicie o ngrok para simular a AWS:
+   ```bash
+   ngrok http 3000
+   ```
+4. Set corretamente o .env
+5. Inicie o servidor localmente:
+   ```bash
+   npm run dev
+   ```
+6. Acesse o bot [@PolichainG2bot](https://t.me/PolichainG2bot) e dê /start
+---
+
 ### Observações
-- Certifique-se de ter o Node.js instalado em sua máquina.
-- Para utilizar funcionalidades de blockchain, é necessário ter uma carteira digital compatível (ex: MetaMask ou carteira TON).
+- Certifique-se de ter o Node.js e o NGROK instalado em sua máquina.
+- Para utilizar funcionalidades de blockchain, é necessário ter uma carteira digital da carteira TON.
