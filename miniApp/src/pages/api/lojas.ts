@@ -29,7 +29,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: {
           id,
           first_name,
-          nome_loja
+          nome_loja,
+          address
         }
       });
       return res.status(201).json(novaLoja);
@@ -59,7 +60,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: { id },
         data: {
           first_name,
-          nome_loja
+          nome_loja,
+          address
         }
       });
 
