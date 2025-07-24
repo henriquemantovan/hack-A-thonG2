@@ -35,7 +35,9 @@ export function useStoreContract(itemId: bigint) {
                 const raw = storeContract as unknown as { provider?: ContractProvider };
 
                 const value:Item | null = await TactStore.getGetItem((storeContract as any), itemId);
+                const debug2: bigint = await TactStore.getGetStoreId((storeContract as any));
                 console.log("valor: ");
+                console.log(debug2);
                 console.log(value);
                 if (value) {
                     setItemValue(value as Item);
