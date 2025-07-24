@@ -1,4 +1,4 @@
-import { Address, OpenedContract } from "@ton/core";
+import { Address, fromNano, OpenedContract, toNano } from "ton-core";
 import { TactStore } from "../wrapper/simple_counter.tact_TactStore";
 import { useAsyncInitialize } from "./useAsyncInitialize";
 import { useTonClient } from "./useTonClient";
@@ -43,9 +43,9 @@ export function useStoreContract(itemId: bigint) {
             try {
                 setLoading(true);
                 setError(null);
-                
-                const value = await storeContract.getGetItem(itemId);
-                setItemValue(value);
+                console.log(storeContract);
+               // const value = await storeContract.getGetItem(itemId);
+               // setItemValue(value);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'ERRO');
                 alert("erro");
