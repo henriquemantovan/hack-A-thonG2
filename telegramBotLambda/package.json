@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rm -rf dist",
-   "build": "npm run clean && tsc -p tsconfig.json",
-   "deploy": "npm run build && serverless deploy"
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "deploy": "npm run build && serverless deploy"
   },
   "keywords": [
     "telegram",
@@ -19,10 +19,12 @@
   "author": "Seu Nome",
   "license": "MIT",
   "dependencies": {
+    "@prisma/client": "^6.12.0",
     "@tonconnect/ui": "^2.2.0",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "node-telegram-bot-api": "^0.64.0",
+    "prisma": "^6.12.0",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
