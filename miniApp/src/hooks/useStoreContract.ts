@@ -33,7 +33,7 @@ export function useStoreContract(itemId: bigint) {
                 console.log("teste");
                 await sleep(500); // opcional: só para simular delay
 
-                const value:Item | null = await TactStore.getGetItem((storeContract as any).provider, itemId);
+                const value:Item | null = await TactStore.getGetItem((storeContract as any), itemId);
                 if (value) {
                     setItemValue(value as Item);
                     console.log("Item carregado:", value);
