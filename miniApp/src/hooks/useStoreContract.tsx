@@ -10,11 +10,11 @@ import { useEffect, useState } from "react";
 export function useStoreContract(itemId: bigint) {
     const { client } = useTonClient();
     type Item = {
-  $$type: "Item";
-  price: bigint;
-  quantity: bigint;
-  owner: Address;
-};
+    $$type: "Item";
+    price: bigint;
+    quantity: bigint;
+    owner: Address;
+    };
 
     const [itemValue, setItemValue] = useState<Item | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
@@ -30,8 +30,11 @@ export function useStoreContract(itemId: bigint) {
 
     useEffect(() => {
         async function fetchItem() {
+
             if(!storeContract)
-                    alert("erro no contrato");
+                console.error(client?.getBalance);
+                alert(client);
+                alert("erro no contrato");
             if (!storeContract || !itemId) return;
             
             try {
