@@ -1,7 +1,7 @@
 import { CHAIN, useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
-import { Address } from "ton-core";
-import { SenderArguments } from "ton-core";
-import { Sender } from "ton-core";
+import { Address } from "@ton/core";
+import { SenderArguments } from "@ton/core";
+import { Sender } from "@ton/core";
 
 export function useTonConnect(): {
     connected: boolean;
