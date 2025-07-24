@@ -20,27 +20,45 @@ A interface é simples e intuitiva, o vendedor só precisa ter uma carteira TON 
 
 Vale apontar que, devido à sua arquitetura versátil, o sistema pode ser aplicado a lojas online, vendas em eventos, prestação de serviços, entre outros usos.
 
-
 ---
 
 ### Tecnologias Usadas
+
 - #### TypeScript
-    - Descrição: Linguagem principal do projeto, trazendo tipagem estática e maior robustez ao desenvolvimento.
+   - Descrição: Linguagem principal do projeto, trazendo tipagem estática e maior robustez ao desenvolvimento em todas as camadas da aplicação.
 
 - #### Tact
-    - Descrição: Utilizada para criação e gerenciamento dos contratos inteligentes no blockchain.
+   - Descrição: Linguagem de programação para desenvolvimento de contratos inteligentes na blockchain TON, oferecendo segurança e eficiência.
 
-- #### Vite.js
-    - Descrição: Ferramenta moderna para construção do front-end, proporcionando desenvolvimento rápido e eficiente.
+- #### Next.js
+   - Descrição: Framework React para desenvolvimento full-stack, proporcionando renderização server-side e geração de sites estáticos.
 
 - #### React
-    - Descrição: Biblioteca JavaScript para criação de interfaces de usuário dinâmicas e reativas.
+   - Descrição: Biblioteca JavaScript para criação de interfaces de usuário dinâmicas e reativas no mini app.
 
-- #### RainbowKit
-   - Descrição: Biblioteca para integração e gerenciamento de carteiras digitais na aplicação.
+- #### TON Connect
+   - Descrição: SDK oficial para integração com carteiras TON, permitindo conexão segura e transações na blockchain TON.
 
-- #### Wagmi
-    - Descrição: Simplifica a conexão entre a aplicação front-end e os contratos inteligentes no blockchain.
+- #### Prisma
+   - Descrição: ORM moderno para TypeScript que facilita o acesso e manipulação do banco de dados com type-safety.
+
+- #### Tailwind CSS
+   - Descrição: Framework CSS utility-first para estilização rápida e responsiva da interface do usuário.
+
+- #### Telegram Bot API
+   - Descrição: API oficial do Telegram para criação de bots interativos e automatização de processos de e-commerce.
+
+- #### AWS Lambda & Serverless
+   - Descrição: Plataforma serverless para execução do bot do Telegram, garantindo escalabilidade e baixo custo operacional.
+
+- #### TON Blueprint
+   - Descrição: Ferramenta de desenvolvimento para contratos inteligentes TON, facilitando build, teste e deploy dos smart contracts.
+
+- #### Vercel
+   - Descrição: Plataforma de deploy e hospedagem para aplicações front-end, oferecendo integração contínua e performance otimizada.
+
+- #### Neon
+   - Descrição: Banco de dados PostgreSQL serverless, proporcionando escalabilidade automática e gerenciamento simplificado de dados.
 
 ---
 
