@@ -23,7 +23,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["handler.ts",
+  "include": ["src/handler.ts",
     "**/*.ts"
   ],
   "exclude": [
