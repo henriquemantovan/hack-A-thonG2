@@ -104,6 +104,6 @@ Vale apontar que, devido à sua arquitetura versátil, o sistema pode ser aplica
 6. Acesse o bot [@PolichainG2bot](https://t.me/PolichainG2bot) e dê /start
 ---
 
-### Observações
+#### Observações
 - Certifique-se de ter o Node.js e o NGROK instalado em sua máquina.
 - Para utilizar funcionalidades de blockchain, é necessário ter uma carteira digital da carteira TON.
