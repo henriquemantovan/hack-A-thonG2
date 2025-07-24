@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useStoreContract } from "../hooks/useStoreContract"; // Ajuste o caminho conforme seu projeto
 
-export function StoreViewer() {
+export default function StoreViewer() {
   const [inputId, setInputId] = useState("");
 const [itemId, setItemId] = useState<bigint>(0n);
 
