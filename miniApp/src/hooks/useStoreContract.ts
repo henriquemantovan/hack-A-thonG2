@@ -8,7 +8,7 @@ const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, tim
 
 export function useStoreContract(itemId: bigint) {
     const { client } = useTonClient();
-
+    let debug :bigint;
 
     const [itemValue, setItemValue] = useState<Item | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
@@ -33,11 +33,10 @@ export function useStoreContract(itemId: bigint) {
                 console.log("teste");
                 await sleep(500); // opcional: só para simular delay
                 const raw = storeContract as unknown as { provider?: ContractProvider };
-
                 const value:Item | null = await TactStore.getGetItem((storeContract as any), itemId);
-                const debug2: bigint = await TactStore.getGetStoreId((storeContract as any));
+                debug = await TactStore.getGetStoreId((storeContract as any));
                 console.log("valor: ");
-                console.log(debug2);
+                console.log(debug);
                 console.log(value);
                 if (value) {
                     setItemValue(value as Item);
@@ -46,6 +45,7 @@ export function useStoreContract(itemId: bigint) {
                     setError("Item não encontrado");
                 }
             } catch (err) {
+                console.log(debug);
                 setError(err instanceof Error ? err.message : "Erro ao buscar item");
                 console.error("Erro ao buscar item:", err);
             } finally {
