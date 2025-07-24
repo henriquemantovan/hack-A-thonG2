@@ -18,7 +18,7 @@ A proposta é oferecer uma experiência fluida e acessível tanto para vendedore
 
 A interface é simples e intuitiva, o vendedor só precisa ter uma carteira TON para começar. Os usuários podem buscar produtos, navegar pelas categorias e realizar compras diretamente no chat. Os pagamentos são registrados diretamente na blockchain da TON, garantindo transparência, confiabilidade e remoção de intermediários. Essa abordagem traz ao Telegram a praticidade de um e-commerce com a confiança das soluções Web3.
 
-Vale apontar que, devido à uma uma arquitetura versátil, o sistema pode ser aplicado a lojas online, vendas em eventos, prestação de serviços, entre outros usos.
+Vale apontar que, devido à sua arquitetura versátil, o sistema pode ser aplicado a lojas online, vendas em eventos, prestação de serviços, entre outros usos.
 
 
 ---
@@ -65,4 +65,4 @@ Vale apontar que, devido à uma uma arquitetura versátil, o sistema pode ser ap
 
 ### Observações
 - Certifique-se de ter o Node.js instalado em sua máquina.
-- Para utilizar funcionalidades de blockchain, é necessário ter uma carteira digital compatível (ex: MetaMask).
+- Para utilizar funcionalidades de blockchain, é necessário ter uma carteira digital compatível (ex: MetaMask ou carteira TON).
