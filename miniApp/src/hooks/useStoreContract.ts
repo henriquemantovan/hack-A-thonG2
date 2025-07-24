@@ -1,56 +1,48 @@
-import { Address, fromNano, OpenedContract, toNano } from "ton-core";
+import { Address, OpenedContract } from "@ton/ton";
 import { TactStore } from "../wrapper/simple_counter.tact_TactStore";
 import { useAsyncInitialize } from "./useAsyncInitialize";
 import { useTonClient } from "./useTonClient";
-import { useTonConnect } from "./useTonConnect";
-import { useTonAddress } from "@tonconnect/ui-react";
-import { Contract } from "ton";
 import { useEffect, useState } from "react";
+import { Item } from "../wrapper/simple_counter.tact_TactStore";
+const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
 
-const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time))
 export function useStoreContract(itemId: bigint) {
     const { client } = useTonClient();
-    type Item = {
-    $$type: "Item";
-    price: bigint;
-    quantity: bigint;
-    owner: Address;
-    };
+
 
     const [itemValue, setItemValue] = useState<Item | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    
-    const storeContract = useAsyncInitialize(async () => { 
-        alert("acessando o cliente");
+
+    const storeContract = useAsyncInitialize<OpenedContract<TactStore> | null>(async () => {
         if (!client) return null;
         const contract = TactStore.fromAddress(
             Address.parse("kQCTKOdZqwp35I44Xtp_psL7qOQp_R1kFR9_0dJjn16A5sjf")
         );
-        return client.open(contract as Contract) as OpenedContract<TactStore>;
+        return client.open(contract) as OpenedContract<TactStore>;
     }, [client]);
 
     useEffect(() => {
         async function fetchItem() {
-
-            if(!storeContract)
-                alert("erro no contrato");
             if (!storeContract || !itemId) return;
-            
+
             try {
                 setLoading(true);
                 setError(null);
-                setItemValue(null);   
-                console.log(storeContract);
-                await sleep(5000);
-                const value = await storeContract.getGetStoreId;
-                setItemValue(value);
-                console.log(value);
+                setItemValue(null);
 
+                await sleep(500); // opcional: só para simular delay
+
+                const value:Item | null = await TactStore.getGetItem((storeContract as any).provider, itemId);
+                if (value) {
+                    setItemValue(value as Item);
+                    console.log("Item carregado:", value);
+                } else {
+                    setError("Item não encontrado");
+                }
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'ERRO');
-                alert("erro");
-                console.error("ERRO", err);
+                setError(err instanceof Error ? err.message : "Erro ao buscar item");
+                console.error("Erro ao buscar item:", err);
             } finally {
                 setLoading(false);
             }
@@ -65,7 +57,4 @@ export function useStoreContract(itemId: bigint) {
         error,
         storeContract
     };
-
-
 }
-
