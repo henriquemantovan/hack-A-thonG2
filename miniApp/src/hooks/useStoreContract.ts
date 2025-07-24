@@ -1,4 +1,4 @@
-import { Address, OpenedContract } from "@ton/ton";
+import { Address, ContractProvider, OpenedContract } from "@ton/ton";
 import { TactStore } from "../wrapper/simple_counter.tact_TactStore";
 import { useAsyncInitialize } from "./useAsyncInitialize";
 import { useTonClient } from "./useTonClient";
@@ -32,8 +32,14 @@ export function useStoreContract(itemId: bigint) {
                 setItemValue(null);
                 console.log("teste");
                 await sleep(500); // opcional: só para simular delay
+                const raw = storeContract as unknown as { provider?: ContractProvider };
+                
 
-                const value:Item | null = await TactStore.getGetItem((storeContract as any), itemId);
+                if (!raw.provider) {
+                setError("Contrato não inicializado corretamente (sem provider).");
+                return;
+                }
+                const value:Item | null = await TactStore.getGetItem(raw.provider, itemId);
                 if (value) {
                     setItemValue(value as Item);
                     console.log("Item carregado:", value);
