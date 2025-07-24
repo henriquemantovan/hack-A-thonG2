@@ -163,6 +163,10 @@ const Home = () => {
     router.push('/gerenciarloja/'+ userData.userId);
   };
 
+  const handleSacar = () => {
+    alert('Funcionalidade não implementada.');
+  }
+
   // Tela de loading
   if (isLoading) {
     return (
@@ -311,13 +315,13 @@ const Home = () => {
         </div>
 
         {/* corpo da barraquinha */}
-        <div className="bg-gradient-to-b from-amber-200 to-amber-300 shadow-xl p-8 w-80 min-h-78 relative z-10"
+        <div className="bg-gradient-to-b from-amber-200 to-amber-300 shadow-xl p-8 w-80 min-h-96 relative z-10"
           style={{ background: '#feebb3' }}
         >
           <div className="absolute inset-x-4 top-4 h-1 bg-gradient-to-r from-amber-600 to-amber-700 rounded-full"                    
             style={{ background: '#5d412c' }}
           />
-          <div className="absolute inset-x-4 bottom-7 h-1 bg-gradient-to-r from-amber-600 to-amber-700 rounded-full"                     
+          <div className="absolute inset-x-4 bottom-8 h-1 bg-gradient-to-r from-amber-600 to-amber-700 rounded-full"                     
             style={{ background: '#5d412c' }}
           />
           
@@ -353,6 +357,16 @@ const Home = () => {
               >
                 <div className="flex items-center justify-center space-x-2">
                   <span>Gerenciar Loja</span>
+                </div>
+              </button>
+
+               <button
+                onClick={handleSacar}
+                className="w-full cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 border-2 border-blue-600 hover:border-blue-700 text-lg"
+                style={{ background: '#f0ae00', border: '2px solid #f0ae00' }}
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <span>Sacar</span>
                 </div>
               </button>
             </div>
