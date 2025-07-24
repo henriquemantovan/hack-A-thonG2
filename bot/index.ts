@@ -50,35 +50,18 @@ app.listen(PORT, async () => {
   console.log(`🚀 Server rodando em http://localhost:${PORT}`);
 });
 
-// Type definitions for in-memory data (will be replaced by DB types)
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  description: string; // Assuming you might add this later or derive from photo
-  storeId: string;
-  stock: number;
-}
-
-interface Store {
-  id: string;
-  name: string;
-  description: string;
-  ownerId: number; // This might become optional or derived if not in Lojas model
-  products: Product[];
-}
-
-interface OrderItem {
+// Type definitions for in-memory temporary orders (before DB storage)
+interface TempOrderItem {
   productId: string;
   productName: string;
   quantity: number;
   price: number;
 }
 
-interface Order {
+interface TempOrder {
   id: string;
   userId: number;
-  items: OrderItem[];
+  items: TempOrderItem[];
   total: number;
   status: 'pending' | 'paid' | 'cancelled';
   paymentAddress?: string;
@@ -86,8 +69,8 @@ interface Order {
   createdAt: Date;
 }
 
-// Dados em memória (em produção, usar banco de dados) - REMOVED, will fetch from DB
-let orders: Order[] = [];
+// Dados temporários em memória para pedidos pendentes (antes do pagamento)
+let tempOrders: TempOrder[] = [];
 
 // Função para gerar endereço TON (mock)
 function generateTonAddress(): string {
@@ -98,6 +81,58 @@ function generateTonAddress(): string {
 async function generatePaymentQR(address: string, amount: number): Promise<Buffer> {
   const tonUrl = `ton://transfer/${address}?amount=${amount * 1000000000}`; // TON usa nano-tons
   return await QRCode.toBuffer(tonUrl);
+}
+
+// Função para salvar pedido no banco de dados
+async function saveOrderToDatabase(tempOrder: TempOrder): Promise<void> {
+  try {
+    await prisma.order.create({
+      data: {
+        id: tempOrder.id,
+        userId: BigInt(tempOrder.userId),
+        total: tempOrder.total,
+        status: tempOrder.status,
+        paymentAddress: tempOrder.paymentAddress,
+        transactionHash: tempOrder.transactionHash,
+        createdAt: tempOrder.createdAt,
+        items: {
+          create: tempOrder.items.map(item => ({
+            productId: item.productId,
+            productName: item.productName,
+            quantity: item.quantity,
+            price: item.price
+          }))
+        }
+      },
+      include: {
+        items: true
+      }
+    });
+    console.log(`✅ Pedido ${tempOrder.id} salvo no banco de dados`);
+  } catch (error) {
+    console.error('❌ Erro ao salvar pedido no banco:', error);
+    throw error;
+  }
+}
+
+// Função para atualizar estoque do produto
+async function updateProductStock(productId: string, quantity: number): Promise<boolean> {
+  try {
+    await prisma.product.update({
+      where: { id: productId },
+      data: {
+        quant: {
+          decrement: quantity
+        }
+      }
+    });
+
+    console.log(`✅ Estoque do produto ${productId} atualizado. Quantidade reduzida em ${quantity}`);
+    return true;
+  } catch (error) {
+    console.error('❌ Erro ao atualizar estoque:', error);
+    return false;
+  }
 }
 
 // Comandos do bot
@@ -269,7 +304,7 @@ bot.on('callback_query', async (query) => {
           where: { id: product.id_vendor }
       });
 
-const caption = `
+      const caption = `
 📦 *${product.name}*
 💰 Preço: ${product.price.toFixed(2)} tons
 🏪 Loja: ${store?.nome_loja || 'N/A'}
@@ -286,12 +321,12 @@ const caption = `
           ]
         ]
       };
+      
       bot.sendPhoto(chatId, product.photo, {
         caption,
         parse_mode: 'Markdown',
         reply_markup: keyboard
       });
-
     }
 
     else if (data.startsWith('buy_')) {
@@ -305,8 +340,8 @@ const caption = `
         return;
       }
 
-      // Create order
-      const order: Order = {
+      // Create temporary order
+      const order: TempOrder = {
         id: crypto.randomUUID(),
         userId: query.from.id,
         items: [{
@@ -321,7 +356,7 @@ const caption = `
         createdAt: new Date()
       };
 
-      orders.push(order);
+      tempOrders.push(order);
 
       // Gerar QR Code
       const qrBuffer = await generatePaymentQR(order.paymentAddress!, order.total);
@@ -358,7 +393,7 @@ Escaneie o QR Code abaixo para pagar:
 
     else if (data.startsWith('confirm_payment_')) {
       const orderId = data.replace('confirm_payment_', '');
-      const order = orders.find(o => o.id === orderId);
+      const order = tempOrders.find(o => o.id === orderId);
 
       if (!order) {
         bot.sendMessage(chatId, 'Pedido não encontrado.');
@@ -370,11 +405,29 @@ Escaneie o QR Code abaixo para pagar:
         return;
       }
 
-      // Simular confirmação de pagamento (em produção, verificar blockchain)
-      order.status = 'paid';
-      order.transactionHash = crypto.randomBytes(32).toString('hex');
+      try {
+        // Simular confirmação de pagamento (em produção, verificar blockchain)
+        order.status = 'paid';
+        order.transactionHash = crypto.randomBytes(32).toString('hex');
 
-      const confirmMessage = `
+        // Atualizar estoque de todos os produtos do pedido
+        for (const item of order.items) {
+          const stockUpdated = await updateProductStock(item.productId, item.quantity);
+          if (!stockUpdated) {
+            console.log(`⚠️ Aviso: Erro ao atualizar estoque do produto ${item.productName}`);
+          }
+        }
+
+        // Salvar pedido no banco de dados
+        await saveOrderToDatabase(order);
+
+        // Remover da lista temporária
+        const index = tempOrders.findIndex(o => o.id === orderId);
+        if (index !== -1) {
+          tempOrders.splice(index, 1);
+        }
+
+        const confirmMessage = `
 ✅ **Pagamento Confirmado!**
 
 📋 Pedido: ${order.id}
@@ -382,19 +435,23 @@ Escaneie o QR Code abaixo para pagar:
 🔗 Hash da Transação: \`${order.transactionHash}\`
 
 🎉 Obrigado pela compra!
-      `;
+        `;
 
-      bot.sendMessage(chatId, confirmMessage, {
-        parse_mode: 'Markdown'
-      });
+        bot.sendMessage(chatId, confirmMessage, {
+          parse_mode: 'Markdown'
+        });
 
-      // Notificar vendedor (se implementado)
-      // notifyVendor(order);
+        // Notificar vendedor (se implementado)
+        // notifyVendor(order);
+      } catch (error) {
+        console.error('Erro ao confirmar pagamento:', error);
+        bot.sendMessage(chatId, '❌ Erro ao processar pagamento. Tente novamente.');
+      }
     }
 
     else if (data.startsWith('cancel_order_')) {
       const orderId = data.replace('cancel_order_', '');
-      const order = orders.find(o => o.id === orderId);
+      const order = tempOrders.find(o => o.id === orderId);
 
       if (!order) {
         bot.sendMessage(chatId, 'Pedido não encontrado.');
@@ -406,25 +463,50 @@ Escaneie o QR Code abaixo para pagar:
     }
 
     else if (data === 'my_orders') {
-      const userOrders = orders.filter(o => o.userId === query.from.id);
+      const userId = query.from.id;
+      
+      try {
+        // Buscar pedidos do usuário no banco de dados
+        const userOrders = await prisma.order.findMany({
+          where: { userId: BigInt(userId) },
+          include: {
+            items: true
+          },
+          orderBy: {
+            createdAt: 'desc'
+          }
+        });
 
-      if (userOrders.length === 0) {
-        bot.sendMessage(chatId, 'Você ainda não fez nenhum pedido.');
-        return;
+        if (userOrders.length === 0) {
+          bot.sendMessage(chatId, 'Você ainda não fez nenhum pedido.');
+          return;
+        }
+
+        let message = '🛍️ **Meus Pedidos:**\n\n';
+
+        userOrders.forEach((order: any) => {
+          const statusEmoji = order.status === 'paid' ? '✅' : order.status === 'pending' ? '⏳' : '❌';
+          message += `${statusEmoji} **${order.id.substring(0, 8)}...**\n`;
+          message += `💰 Total: ${order.total.toFixed(2)} tons\n`;
+          message += `📅 Data: ${order.createdAt.toLocaleDateString('pt-BR')}\n`;
+          
+          if (order.items.length > 0) {
+            message += '📦 Itens:\n';
+            order.items.forEach((item: any) => {
+              message += `  • ${item.productName} (${item.quantity}x) - ${(Number(item.price) * item.quantity).toFixed(2)} tons\n`;
+            });
+          }
+          
+          message += '\n';
+        });
+
+        bot.sendMessage(chatId, message, {
+          parse_mode: 'Markdown'
+        });
+      } catch (error) {
+        console.error('Erro ao buscar pedidos:', error);
+        bot.sendMessage(chatId, '❌ Erro ao buscar seus pedidos. Tente novamente.');
       }
-
-      let message = '🛍️ **Meus Pedidos:**\n\n';
-
-      userOrders.forEach(order => {
-        const statusEmoji = order.status === 'paid' ? '✅' : order.status === 'pending' ? '⏳' : '❌';
-        message += `${statusEmoji} **${order.id}**\n`;
-        message += `💰 Total: ${order.total.toFixed(2)} tons\n`;
-        message += `📅 Data: ${order.createdAt.toLocaleDateString('pt-BR')}\n\n`;
-      });
-
-      bot.sendMessage(chatId, message, {
-        parse_mode: 'Markdown'
-      });
     }
 
     // Responder ao callback query
@@ -437,37 +519,54 @@ Escaneie o QR Code abaixo para pagar:
 });
 
 // Comando para meus pedidos
-bot.onText(/\/meus_pedidos/, (msg) => {
+bot.onText(/\/meus_pedidos/, async (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from?.id;
 
   if (!userId) return;
 
-  const userOrders = orders.filter(o => o.userId === userId);
-
-  if (userOrders.length === 0) {
-    bot.sendMessage(chatId, 'Você ainda não fez nenhum pedido.');
-    return;
-  }
-
-  let message = '🛍️ **Meus Pedidos:**\n\n';
-
-  userOrders.forEach(order => {
-    const statusEmoji = order.status === 'paid' ? '✅' : order.status === 'pending' ? '⏳' : '❌';
-    message += `${statusEmoji} **${order.id}**\n`;
-    message += `💰 Total: ${order.total.toFixed(2)} tons\n`;
-    message += `📅 Data: ${order.createdAt.toLocaleDateString('pt-BR')}\n`;
-
-    order.items.forEach(item => {
-      message += `  • ${item.productName} (${item.quantity}x) - ${(item.price * item.quantity).toFixed(2)} tons\n`;
+  try {
+    // Buscar pedidos do usuário no banco de dados
+    const userOrders = await prisma.order.findMany({
+      where: { userId: BigInt(userId) },
+      include: {
+        items: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
 
-    message += '\n';
-  });
+    if (userOrders.length === 0) {
+      bot.sendMessage(chatId, 'Você ainda não fez nenhum pedido.');
+      return;
+    }
 
-  bot.sendMessage(chatId, message, {
-    parse_mode: 'Markdown'
-  });
+    let message = '🛍️ **Meus Pedidos:**\n\n';
+
+    userOrders.forEach(order => {
+      const statusEmoji = order.status === 'paid' ? '✅' : order.status === 'pending' ? '⏳' : '❌';
+      message += `${statusEmoji} **${order.id.substring(0, 8)}...**\n`;
+      message += `💰 Total: ${order.total.toFixed(2)} tons\n`;
+      message += `📅 Data: ${order.createdAt.toLocaleDateString('pt-BR')}\n`;
+
+      if (order.items.length > 0) {
+        message += '📦 Itens:\n';
+        order.items.forEach(item => {
+          message += `  • ${item.productName} (${item.quantity}x) - ${(Number(item.price) * item.quantity).toFixed(2)} tons\n`;
+        });
+      }
+
+      message += '\n';
+    });
+
+    bot.sendMessage(chatId, message, {
+      parse_mode: 'Markdown'
+    });
+  } catch (error) {
+    console.error('Erro ao buscar pedidos:', error);
+    bot.sendMessage(chatId, '❌ Erro ao buscar seus pedidos. Tente novamente.');
+  }
 });
 
 // Comando para abrir Mini App MODIFIQUEI
@@ -514,11 +613,10 @@ bot.on('web_app_data', async (msg) => {
   if (!userId) return;
 
   try {
-
     const orderData = JSON.parse(webApp.data);
 
-    // Create order from WebApp data
-    const order: Order = {
+    // Create temporary order from WebApp data
+    const order: TempOrder = {
       id: crypto.randomUUID(),
       userId: userId,
       items: orderData.items.map((item: any) => ({
@@ -533,7 +631,7 @@ bot.on('web_app_data', async (msg) => {
       createdAt: new Date()
     };
 
-    orders.push(order);
+    tempOrders.push(order);
 
     // Gerar QR Code
     const qrBuffer = await generatePaymentQR(order.paymentAddress!, order.total);
@@ -544,7 +642,7 @@ bot.on('web_app_data', async (msg) => {
 💰 Total: ${order.total.toFixed(2)} tons
 
 📦 **Itens:**
-${order.items.map(item => `• ${item.productName} (${item.quantity}x) - ${(item.price * item.quantity).toFixed(2)}`).join('\n')} tons
+${order.items.map(item => `• ${item.productName} (${item.quantity}x) - ${(item.price * item.quantity).toFixed(2)} tons`).join('\n')}
 
 📱 **Pagamento via TON:**
 Endereço: \`${order.paymentAddress}\`
@@ -586,6 +684,5 @@ bot.on('polling_error', (error) => {
 
 console.log('🤖 Bot iniciado com sucesso!');
 console.log('📱 WebApp URL:', WEBAPP_URL);
-
 
 export default bot;

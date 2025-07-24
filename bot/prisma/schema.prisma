@@ -21,10 +21,43 @@ model Product {
   quant     Int
   category  String
   id_vendor String   
+  
+  // Relacionamento com itens de pedido
+  orderItems OrderItem[]
 }
 
 model Lojas {
   id         String   @id
   first_name String
   nome_loja  String   @unique
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  userId          BigInt      // Telegram user ID
+  total           Decimal     @db.Decimal(10, 2)
+  status          String      // 'pending', 'paid', 'cancelled'
+  paymentAddress  String?
+  transactionHash String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Relacionamento com itens do pedido
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id          String  @id @default(uuid())
+  orderId     String
+  productId   String
+  productName String
+  quantity    Int
+  price       Decimal @db.Decimal(10, 2)
+  
+  // Relacionamentos
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product @relation(fields: [productId], references: [id])
+  
+  @@index([orderId])
+  @@index([productId])
 }
