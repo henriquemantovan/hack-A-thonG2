@@ -1,4 +1,11 @@
 service: telegram-bot
+frameworkVersion: '4'
+
+layers:
+  prismaClient:
+    path: prisma_layer
+    compatibleRuntimes:
+      - nodejs18.x
 
 plugins:
   - serverless-offline
@@ -7,16 +14,33 @@ provider:
   name: aws
   runtime: nodejs18.x
   environment:
-    BOT_TOKEN: ${env:BOT_TOKEN}
-    WEBAPP_URL: ${env:WEBAPP_URL}
+    BOT_TOKEN:    ${env:BOT_TOKEN}
+    WEBAPP_URL:   ${env:WEBAPP_URL}
+    DATABASE_URL: ${env:DATABASE_URL}
+    # <- a variável abaixo aponta para o engine dentro do layer
+    PRISMA_QUERY_ENGINE_LIBRARY: "/opt/nodejs/node_modules/.prisma/client/libquery_engine-rhel-openssl-1.0.x.so.node"
+
 
 package:
-  include:
-    - dist/**
+  individually: true
+  excludeDevDependencies: true
+
+custom:
+  build:
+    esbuild:
+      bundle: true
+      minify: true
+      target: node18
+      platform: node
+      external:
+        - aws-sdk
+        - '@prisma/client'
 
 functions:
   webhook:
-    handler: dist/handler.webhook     # <— handler.js exporta webhook
+    handler: src/handler.webhook
+    layers:
+      - { Ref: PrismaClientLambdaLayer }
     events:
       - httpApi:
           path: /webhook
