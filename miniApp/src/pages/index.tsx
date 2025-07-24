@@ -315,7 +315,7 @@ const Home = () => {
         </div>
 
         {/* corpo da barraquinha */}
-        <div className="bg-gradient-to-b from-amber-200 to-amber-300 shadow-xl p-8 w-80 min-h-96 relative z-10"
+        <div className="bg-gradient-to-b from-amber-200 to-amber-300 shadow-xl p-8 w-80 min-h-98 relative z-10"
           style={{ background: '#feebb3' }}
         >
           <div className="absolute inset-x-4 top-4 h-1 bg-gradient-to-r from-amber-600 to-amber-700 rounded-full"                    
