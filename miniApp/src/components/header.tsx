@@ -2,7 +2,7 @@
 
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { useTonConnect } from '../hooks/useTonConnect';
-import { Address } from 'ton';
+import { Address } from '@ton/ton';
 
 
 //ALGUEM CENTRALIZA PARA MIM PFV :(

@@ -1229,14 +1229,14 @@ export class TactStore implements Contract {
             
         }
         
-        async getGetStoreId(provider: ContractProvider) {
+        static async getGetStoreId(provider: ContractProvider) {
             const builder = new TupleBuilder();
             const source = (await provider.get('get_store_id', builder.build())).stack;
             const result = source.readBigNumber();
             return result;
         }
         
-        async getGetItem(provider: ContractProvider, id: bigint) {
+        static async getGetItem(provider: ContractProvider, id: bigint): Promise<Item | null>{
             const builder = new TupleBuilder();
             builder.writeNumber(id);
             const source = (await provider.get('get_item', builder.build())).stack;
