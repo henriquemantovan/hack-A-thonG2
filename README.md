@@ -2,7 +2,7 @@
 
 ### Como acessar o projeto
 - Nome/link do nosso bot  do telegram [@PolichainG2bot](https://t.me/PolichainG2bot)
-- MiniApp deployado na vercel no link: https://marketon-rust.vercel.app/
+- MiniApp deployado na vercel no link: https://marketon-rust.vercel.app/ (OBS: miniApp só roda completamente dentro do telegram)
 - Link do contrato deployado: https://testnet.tonviewer.com/EQBey5cqzRBkAe9fQu06zHRCvVuRLWS7KiCogOL7X32XJPdh
 
 
