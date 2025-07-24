@@ -31,7 +31,7 @@ export function useStoreContract(itemId: bigint) {
                 setError(null);
                 setItemValue(null);
                 console.log("teste");
-                await sleep(500); // opcional: só para simular delay
+                await sleep(500);
                 const raw = storeContract as unknown as { provider?: ContractProvider };
                 const value:Item | null = await TactStore.getGetItem((storeContract as any), itemId);
                 debug = await TactStore.getGetStoreId((storeContract as any));
