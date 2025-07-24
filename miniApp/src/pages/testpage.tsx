@@ -10,8 +10,10 @@ export default function StoreViewer() {
   const [priceInput, setPriceInput] = useState("");
   const [quantityInput, setQuantityInput] = useState("");
   const [txStatus, setTxStatus] = useState("");
+  const [itemMax, setItemMax] = useState<bigint | null>(null);
+  const [loadingMax, setLoadingMax] = useState(false);
 
-  const { itemValue, loading, error, storeContract } = useStoreContract(itemId);
+  const { itemValue, loading, error, storeContract, getItemMax } = useStoreContract(itemId);
   const { sender, connected } = useTonConnect();
 
   const handleFetchItem = () => {
@@ -67,6 +69,13 @@ export default function StoreViewer() {
     }
   };
 
+  const handleGetItemMax = async () => {
+    setLoadingMax(true);
+    const result = await getItemMax();
+    setItemMax(result);
+    setLoadingMax(false);
+  };
+
   return (
     <div style={{ padding: "20px", fontFamily: "sans-serif", maxWidth: "500px" }}>
       <h2>Consultar Item da Store</h2>
@@ -91,6 +100,12 @@ export default function StoreViewer() {
           <p><strong>Quantidade:</strong> {itemValue.quantity.toString()}</p>
           <p><strong>Dono:</strong> {itemValue.owner.toString()}</p>
         </div>
+      )}
+
+      <button onClick={handleGetItemMax} style={grayButton}>📊 Ver Total de Itens na Store</button>
+      {loadingMax && <p>Carregando...</p>}
+      {itemMax !== null && (
+        <p>🔢 Total de itens adicionados no contrato: <strong>{itemMax.toString()}</strong></p>
       )}
 
       <hr style={{ margin: "30px 0" }} />
@@ -143,6 +158,11 @@ const buttonStyle = {
 const greenButton = {
   ...buttonStyle,
   backgroundColor: "#28a745",
+};
+
+const grayButton = {
+  ...buttonStyle,
+  backgroundColor: "#6c757d",
 };
 
 const boxStyle = {

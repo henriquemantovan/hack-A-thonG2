@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import Button from '../../components/Button';
 import { useStoreContract } from '../../hooks/useStoreContract'; // Supondo que você tenha uma função para adicionar item ao contrato
 import { createHash } from 'crypto';
+import { useTonConnect } from '../../hooks/useTonConnect';
+import { toNano } from '@ton/core';
 
 
 
@@ -18,6 +20,7 @@ const CadastrarProduto = () => {
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showSuccess, setShowSuccess] = useState(false);
+  const { sender } = useTonConnect();
 
   const uploadImage = async (file: File): Promise<string> => {
     const formData = new FormData();
@@ -66,8 +69,8 @@ const CadastrarProduto = () => {
   const handleCadastrar = async () => {
     if (!validateFields() || typeof userId !== 'string') return;
 
-    const { storeContract } = useStoreContract(0n); // 0n temporário
-
+    const { itemValue, loading, error, storeContract, getItemMax } = useStoreContract(0n);
+    const { sender } = useTonConnect();
     setUploading(true);
     setErrors({});
 
@@ -78,17 +81,27 @@ const CadastrarProduto = () => {
         imageUrl = await uploadImage(imagem);
       }
 
-      const precoNumerico = parseFloat(preco.replace(',', '.')) % 1000000000;
+      const precoNumerico = parseFloat(preco.replace(',', '.')) / 1000000000;
       const quantNumerico = parseInt(quant);
 
-      const itemCount = await storeContract?.getGetItemCount(); 
+      const itemCount = await getItemMax();
       const nextItemId = itemCount ? itemCount + 1n : 1n;
 
-      const { sendAddItem } = useStoreContract(nextItemId);
-
-      await sendAddItem(precoNumerico, quantNumerico);
-
-
+      alert("passei aqui");
+      alert(itemCount);
+      if (!storeContract || !sender) {
+          setErrors({ general: "Contrato ou wallet não conectados." });
+          return;
+        }
+      await storeContract.send(
+      sender,
+      { value: toNano(0.2) },
+      {
+        $$type: "AddItem",
+        price: toNano(precoNumerico),
+        quantity: BigInt(quantNumerico),
+      }
+    );
       const res = await fetch('/api/products', {
         method: 'POST',
         headers: {
