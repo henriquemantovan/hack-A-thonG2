@@ -21,7 +21,10 @@ export function useStoreContract(itemId: bigint) {
     const [error, setError] = useState<string | null>(null);
     
     const storeContract = useAsyncInitialize(async () => { 
-        if (!client) return;
+        if (!client) 
+            {
+                alert("ERRO NO CLIENTE");
+                return};
         const contract = TactStore.fromAddress(
             Address.parse("kQCTKOdZqwp35I44Xtp_psL7qOQp_R1kFR9_0dJjn16A5sjf")
         );
