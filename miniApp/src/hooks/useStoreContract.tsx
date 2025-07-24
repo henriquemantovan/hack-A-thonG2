@@ -21,21 +21,22 @@ export function useStoreContract(itemId: bigint) {
     const [error, setError] = useState<string | null>(null);
     
     const storeContract = useAsyncInitialize(async () => { 
+        alert("acessando o cliente");
         if (!client) 
             {
                 alert("ERRO NO CLIENTE");
-                return};
+                return
+            };
         const contract = TactStore.fromAddress(
             Address.parse("kQCTKOdZqwp35I44Xtp_psL7qOQp_R1kFR9_0dJjn16A5sjf")
         );
-        return client.open(contract as unknown as Contract) as OpenedContract<TactStore>;
+        return client.open(contract as Contract) as OpenedContract<TactStore>;
     }, [client]);
 
     useEffect(() => {
         async function fetchItem() {
 
             if(!storeContract)
-                alert(client);
                 alert("erro no contrato");
             if (!storeContract || !itemId) return;
             
