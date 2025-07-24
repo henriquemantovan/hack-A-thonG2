@@ -1030,7 +1030,7 @@ function initTactStore_init_args(src: TactStore_init_args) {
 }
 
 async function TactStore_init(storeId: bigint) {
-    const __code = Cell.fromHex('b5ee9c724102100100031200022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d9010902027102040177bea2976a268690000cd698ffa02698faa903609cd408080eb800080e8b6b8712a816d9e36189037491836cc90377968403791b781f11037491836ef40300428020230259f40f6fa192306ddf206e92306d9dd0d31fd31ffa4055206c136f03e20203967005070145a7dfda89a1a4000335a63fe809a63eaa40d82735020203ae000203a2dae1c5b678d863060002200145a5ebda89a1a4000335a63fe809a63eaa40d82735020203ae000203a2dae1c5b678d8630800022204cc01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019ad31ff404d31f55206c139a810101d7000101d16d70e204925f04e002d70d1ff2e0822182102e2b1355bae30221821089ed25cabae3022182106fa2ffeebae302018210946a98b6ba0a0b0c0f007e31d31fd31f30f8420280205023c855205023cb1fcb1fcec924103401206e953059f45b30944133f417e202a412c87f01ca0055205023cb1ff400cb1fc9ed5400b631d31f302280202259f40f6fa192306ddf206e92306d9dd0d31fd31ffa4055206c136f03e28200b802216eb3f2f4206ef2d0806f236c2182008638f84212c705f2f4588020f45b3058c87f01ca0055205023cb1ff400cb1fc9ed5402fe31d31f302280202259f40f6fa192306ddf206e92306d9dd0d31fd31ffa4055206c136f03e28200b802216eb3f2f4206ef2d0806f238200d6b922c200f2f4f8416f24135f038200bcd52182103b9aca00a90425bef2f45210706d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf818ae2f4000d0e001a58cf8680cf8480f400f400cf810094c901fb0001a520c2008e22010280205023c855205023cb1fcb1fcec9103412206e953059f45b30944133f417e2985f03588020f45b30e258c87f01ca0055205023cb1ff400cb1fc9ed54009e8e47d33f30c8018210aff90f5758cb1fcb3fc913f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055205023cb1ff400cb1fc9ed54e05f04f2c082174d95c4');
+    const __code = Cell.fromHex('b5ee9c724102190100043900022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d90112020271020a0201200305014bba0f1ed44d0d200019ad31ff404d31f55206c139a810101d7000101d16d70e25502db3c6c3180400668020230259f40f6fa192306ddf206e92306d9dd0d31fd31ffa4055206c136f03e28200e355216eb3f2f4206ef2d0806f2330310201480608014bb1c23b513434800066b4c7fd0134c7d5481b04e6a0404075c00040745b5c389540b6cf1b0c600700648020230259f40f6fa192306ddf206e92306d9dd0d31fd31ffa4055206c136f03e28200e355216eb3f2f4206ef2d0806f235b0177b114bb513434800066b4c7fd0134c7d5481b04e6a0404075c00040745b5c389540b6cf1b0c481ba48c1b66481bbcb4201bc8dbc0f8881ba48c1b77a00900428020230259f40f6fa192306ddf206e92306d9dd0d31fd31ffa4055206c136f03e202016a0b1002016e0c0e0145a7dfda89a1a4000335a63fe809a63eaa40d82735020203ae000203a2dae1c5b678d8630d0002200145a5ebda89a1a4000335a63fe809a63eaa40d82735020203ae000203a2dae1c5b678d8630f000222014bb1c3bb513434800066b4c7fd0134c7d5481b04e6a0404075c00040745b5c389540b6cf1b0c601100668020230259f40f6fa192306ddf206e92306d9dd0d31fd31ffa4055206c136f03e28200e355216eb3f2f4206ef2d0806f236c2104cc01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019ad31ff404d31f55206c139a810101d7000101d16d70e204925f04e002d70d1ff2e0822182102e2b1355bae30221821089ed25cabae3022182106fa2ffeebae302018210946a98b6ba13141518007e31d31fd31f30f8420280205023c855205023cb1fcb1fcec924103401206e953059f45b30944133f417e202a412c87f01ca0055205023cb1ff400cb1fc9ed5400b631d31f302280202259f40f6fa192306ddf206e92306d9dd0d31fd31ffa4055206c136f03e28200b802216eb3f2f4206ef2d0806f236c2182008638f84212c705f2f4588020f45b3058c87f01ca0055205023cb1ff400cb1fc9ed5402fe31d31f302280202259f40f6fa192306ddf206e92306d9dd0d31fd31ffa4055206c136f03e28200b802216eb3f2f4206ef2d0806f238200d6b922c200f2f4f8416f24135f038200bcd52182103b9aca00a90425bef2f45210706d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf818ae2f4001617001a58cf8680cf8480f400f400cf810094c901fb0001a520c2008e22010280205023c855205023cb1fcb1fcec9103412206e953059f45b30944133f417e2985f03588020f45b30e258c87f01ca0055205023cb1ff400cb1fc9ed54009e8e47d33f30c8018210aff90f5758cb1fcb3fc913f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055205023cb1ff400cb1fc9ed54e05f04f2c082493803d8');
     const builder = beginCell();
     builder.storeUint(0, 1);
     initTactStore_init_args({ $$type: 'TactStore_init_args', storeId })(builder);
@@ -1079,6 +1079,7 @@ export const TactStore_errors = {
     47106: { message: "The item doesn't exist" },
     48341: { message: "Insufficient TON sent" },
     54969: { message: "Item is out of stock" },
+    58197: { message: "Item not found" },
 } as const
 
 export const TactStore_errors_backward = {
@@ -1122,6 +1123,7 @@ export const TactStore_errors_backward = {
     "The item doesn't exist": 47106,
     "Insufficient TON sent": 48341,
     "Item is out of stock": 54969,
+    "Item not found": 58197,
 } as const
 
 const TactStore_types: ABIType[] = [
@@ -1157,12 +1159,18 @@ const TactStore_opcodes = {
 const TactStore_getters: ABIGetter[] = [
     {"name":"get_store_id","methodId":118517,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"get_item","methodId":87122,"arguments":[{"name":"id","type":{"kind":"simple","type":"int","optional":false,"format":257}}],"returnType":{"kind":"simple","type":"Item","optional":true}},
+    {"name":"get_item_price","methodId":83720,"arguments":[{"name":"id","type":{"kind":"simple","type":"int","optional":false,"format":257}}],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"get_item_quantity","methodId":73969,"arguments":[{"name":"id","type":{"kind":"simple","type":"int","optional":false,"format":257}}],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"get_item_owner","methodId":120590,"arguments":[{"name":"id","type":{"kind":"simple","type":"int","optional":false,"format":257}}],"returnType":{"kind":"simple","type":"address","optional":false}},
     {"name":"get_item_count","methodId":118255,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
 ]
 
 export const TactStore_getterMapping: { [key: string]: string } = {
     'get_store_id': 'getGetStoreId',
     'get_item': 'getGetItem',
+    'get_item_price': 'getGetItemPrice',
+    'get_item_quantity': 'getGetItemQuantity',
+    'get_item_owner': 'getGetItemOwner',
     'get_item_count': 'getGetItemCount',
 }
 
@@ -1205,51 +1213,75 @@ export class TactStore implements Contract {
     
     constructor(address: Address, init?: { code: Cell, data: Cell }) {
         this.address = address;
-            this.init = init;
-        }
+        this.init = init;
+    }
+    
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: AddItem | RMItem | BuyItem | Deploy) {
         
-        async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: AddItem | RMItem | BuyItem | Deploy) {
-            
-            let body: Cell | null = null;
-            if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'AddItem') {
-                body = beginCell().store(storeAddItem(message)).endCell();
-            }
-            if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'RMItem') {
-                body = beginCell().store(storeRMItem(message)).endCell();
-            }
-            if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'BuyItem') {
-                body = beginCell().store(storeBuyItem(message)).endCell();
-            }
-            if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deploy') {
-                body = beginCell().store(storeDeploy(message)).endCell();
-            }
-            if (body === null) { throw new Error('Invalid message type'); }
-            
-            await provider.internal(via, { ...args, body: body });
-            
+        let body: Cell | null = null;
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'AddItem') {
+            body = beginCell().store(storeAddItem(message)).endCell();
         }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'RMItem') {
+            body = beginCell().store(storeRMItem(message)).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'BuyItem') {
+            body = beginCell().store(storeBuyItem(message)).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deploy') {
+            body = beginCell().store(storeDeploy(message)).endCell();
+        }
+        if (body === null) { throw new Error('Invalid message type'); }
         
-        static async getGetStoreId(provider: ContractProvider) {
-            const builder = new TupleBuilder();
-            const source = (await provider.get('get_store_id', builder.build())).stack;
-            const result = source.readBigNumber();
-            return result;
-        }
-        
-        static async getGetItem(provider: ContractProvider, id: bigint): Promise<Item | null>{
-            const builder = new TupleBuilder();
-            builder.writeNumber(id);
-            const source = (await provider.get('get_item', builder.build())).stack;
-            const result_p = source.readTupleOpt();
-            const result = result_p ? loadTupleItem(result_p) : null;
-            return result;
-        }
-        
-        async getGetItemCount(provider: ContractProvider) {
-            const builder = new TupleBuilder();
-            const source = (await provider.get('get_item_count', builder.build())).stack;
-            const result = source.readBigNumber();
-            return result;
-        }
+        await provider.internal(via, { ...args, body: body });
         
     }
+    
+    async getGetStoreId(provider: ContractProvider) {
+        const builder = new TupleBuilder();
+        const source = (await provider.get('get_store_id', builder.build())).stack;
+        const result = source.readBigNumber();
+        return result;
+    }
+    
+    async getGetItem(provider: ContractProvider, id: bigint) {
+        const builder = new TupleBuilder();
+        builder.writeNumber(id);
+        const source = (await provider.get('get_item', builder.build())).stack;
+        const result_p = source.readTupleOpt();
+        const result = result_p ? loadTupleItem(result_p) : null;
+        return result;
+    }
+    
+    async getGetItemPrice(provider: ContractProvider, id: bigint) {
+        const builder = new TupleBuilder();
+        builder.writeNumber(id);
+        const source = (await provider.get('get_item_price', builder.build())).stack;
+        const result = source.readBigNumber();
+        return result;
+    }
+    
+    async getGetItemQuantity(provider: ContractProvider, id: bigint) {
+        const builder = new TupleBuilder();
+        builder.writeNumber(id);
+        const source = (await provider.get('get_item_quantity', builder.build())).stack;
+        const result = source.readBigNumber();
+        return result;
+    }
+    
+    async getGetItemOwner(provider: ContractProvider, id: bigint) {
+        const builder = new TupleBuilder();
+        builder.writeNumber(id);
+        const source = (await provider.get('get_item_owner', builder.build())).stack;
+        const result = source.readAddress();
+        return result;
+    }
+    
+    async getGetItemCount(provider: ContractProvider) {
+        const builder = new TupleBuilder();
+        const source = (await provider.get('get_item_count', builder.build())).stack;
+        const result = source.readBigNumber();
+        return result;
+    }
+    
+}
