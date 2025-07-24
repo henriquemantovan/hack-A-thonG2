@@ -88,21 +88,8 @@ const CadastrarProduto = () => {
       const itemCount = await getItemMax();
       const nextItemId = itemCount ? itemCount + 1n : 1n;
 
-      alert("passei aqui");
-      alert(itemCount);
-      if (!storeContract || !sender) {
-          setErrors({ general: "Contrato ou wallet não conectados." });
-          return;
-        }
-      await storeContract.send(
-      sender,
-      { value: toNano(0.2) },
-      {
-        $$type: "AddItem",
-        price: toNano(precoNumerico),
-        quantity: BigInt(quantNumerico),
-      }
-    );
+
+
       const res = await fetch('/api/products', {
         method: 'POST',
         headers: {
@@ -119,6 +106,21 @@ const CadastrarProduto = () => {
         }),
       });
 
+
+      if (!storeContract || !sender) {
+        setErrors({ general: "Contrato ou wallet não conectados." });
+        return;
+      }
+      
+      await storeContract.send(
+      sender,
+      { value: toNano(0.2) },
+      {
+        $$type: "AddItem",
+        price: toNano(precoNumerico),
+        quantity: BigInt(quantNumerico),
+      }
+    );
       const data = await res.json();
       if (res.ok) {
         setShowSuccess(true);

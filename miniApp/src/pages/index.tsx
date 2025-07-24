@@ -368,15 +368,6 @@ const Home = () => {
                 </div>
               </button>
 
-               <button
-                onClick={handleSacar}
-                className="w-full cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 border-2 border-blue-600 hover:border-blue-700 text-lg"
-                style={{ background: '#f0ae00', border: '2px solid #f0ae00' }}
-              >
-                <div className="flex items-center justify-center space-x-2">
-                  <span>Sacar</span>
-                </div>
-              </button>
             </div>
           </div>
           
