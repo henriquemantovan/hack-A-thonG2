@@ -40,9 +40,11 @@ export function useStoreContract(itemId: bigint) {
             try {
                 setLoading(true);
                 setError(null);
+                setItemValue(null);   
                 console.log(storeContract);
                 await sleep(5000);
                 const value = await storeContract.getGetStoreId;
+                setItemValue(value);
                 console.log(value);
 
             } catch (err) {
