@@ -32,8 +32,6 @@ export function useStoreContract(itemId: bigint) {
         async function fetchItem() {
 
             if(!storeContract)
-                console.error(client?.getBalance);
-                alert(client?.getBalance);
                 alert(client);
                 alert("erro no contrato");
             if (!storeContract || !itemId) return;
