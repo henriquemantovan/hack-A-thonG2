@@ -1,53 +1,71 @@
 import React, { useState } from "react";
-import { useStoreContract } from "../hooks/useStoreContract";
+import { useStoreContract } from "../hooks/useStoreContract"; // Ajuste o caminho conforme seu projeto
 
-export default function ItemPage() {
+export default function StoreViewer() {
   const [inputId, setInputId] = useState("");
-  const [itemId, setItemId] = useState<bigint | null>(null);
+const [itemId, setItemId] = useState<bigint>(0n);
 
-  // Só chama o hook quando itemId está definido
-  const { itemValue, loading, error } = useStoreContract(itemId ?? BigInt(0));
 
-  // Função que seta o itemId ao clicar no botão
-function handleFetchItem() {
-  alert("Botão clicado!"); // Alerta ao clicar
+  const { itemValue, loading, error } = useStoreContract(itemId);
 
-  if (inputId.trim() === "") return;
-  try {
-    const idBigInt = BigInt(inputId.trim());
-    setItemId(idBigInt);
-  } catch {
-    alert("ID inválido");
-  }
-}
+  const handleFetchItem = () => {
+    if (inputId.trim() === "") {
+      alert("Digite um ID válido.");
+      return;
+    }
 
+    try {
+      const parsedId = BigInt(inputId.trim());
+      setItemId(parsedId);
+    } catch {
+      alert("ID inválido. Deve ser um número.");
+    }
+  };
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h1>Item Viewer</h1>
+    <div style={{ padding: "20px", fontFamily: "sans-serif", maxWidth: "500px" }}>
+      <h2>Consultar Item da Store</h2>
 
-      <div style={{ marginBottom: "1rem" }}>
-        <input
-          type="text"
-          placeholder="Digite o ID do item"
-          value={inputId}
-          onChange={(e) => setInputId(e.target.value)}
-          style={{ marginRight: "0.5rem" }}
-        />
-        <button onClick={handleFetchItem}>Buscar Item</button>
-       
-      </div>
+      <input
+        type="text"
+        value={inputId}
+        onChange={(e) => setInputId(e.target.value)}
+        placeholder="Digite o ID do item (ex: 1)"
+        style={{
+          padding: "10px",
+          fontSize: "16px",
+          width: "100%",
+          marginBottom: "10px",
+          boxSizing: "border-box",
+        }}
+      />
 
-      {loading && <p>Carregando...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {itemValue ? (
-        <div>
+      <button
+        onClick={handleFetchItem}
+        style={{
+          padding: "10px 20px",
+          fontSize: "16px",
+          cursor: "pointer",
+          backgroundColor: "#007bff",
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
+          marginBottom: "20px",
+        }}
+      >
+        Buscar Item
+      </button>
+
+      {loading && <p>🔄 Carregando item...</p>}
+      {error && <p style={{ color: "red" }}>❌ Erro: {error}</p>}
+
+      {itemValue && (
+        <div style={{ border: "1px solid #ccc", padding: "15px", borderRadius: "5px" }}>
+          <h3>📦 Detalhes do Item</h3>
           <p><strong>Preço:</strong> {itemValue.price.toString()}</p>
           <p><strong>Quantidade:</strong> {itemValue.quantity.toString()}</p>
           <p><strong>Dono:</strong> {itemValue.owner.toString()}</p>
         </div>
-      ) : (
-        !loading && <p>Nenhum item encontrado.</p>
       )}
     </div>
   );
