@@ -7,6 +7,7 @@ import { useTonAddress } from "@tonconnect/ui-react";
 import { Contract } from "ton";
 import { useEffect, useState } from "react";
 
+const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time))
 export function useStoreContract(itemId: bigint) {
     const { client } = useTonClient();
     type Item = {
@@ -22,11 +23,7 @@ export function useStoreContract(itemId: bigint) {
     
     const storeContract = useAsyncInitialize(async () => { 
         alert("acessando o cliente");
-        if (!client) 
-            {
-                alert("ERRO NO CLIENTE");
-                return
-            };
+        if (!client) return null;
         const contract = TactStore.fromAddress(
             Address.parse("kQCTKOdZqwp35I44Xtp_psL7qOQp_R1kFR9_0dJjn16A5sjf")
         );
@@ -44,8 +41,9 @@ export function useStoreContract(itemId: bigint) {
                 setLoading(true);
                 setError(null);
                 console.log(storeContract);
-               // const value = await storeContract.getGetItem(itemId);
-               // setItemValue(value);
+                await sleep(5000);
+                const value = (await storeContract.getGetItem);
+
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'ERRO');
                 alert("erro");
