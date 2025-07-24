@@ -19,7 +19,7 @@ export function useStoreContract(itemId: bigint) {
         const contract = TactStore.fromAddress(
             Address.parse("kQCTKOdZqwp35I44Xtp_psL7qOQp_R1kFR9_0dJjn16A5sjf")
         );
-        return client.open(contract) as OpenedContract<TactStore>;
+        return client.open(contract);
     }, [client]);
 
     useEffect(() => {
