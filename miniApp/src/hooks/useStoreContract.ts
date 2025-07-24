@@ -19,7 +19,7 @@ export function useStoreContract(itemId: bigint) {
         const contract = TactStore.fromAddress(
             Address.parse("kQCTKOdZqwp35I44Xtp_psL7qOQp_R1kFR9_0dJjn16A5sjf")
         );
-        return client.open(contract);
+        return client.open(contract) as OpenedContract<TactStore>;
     }, [client]);
 
     useEffect(() => {
@@ -33,13 +33,10 @@ export function useStoreContract(itemId: bigint) {
                 console.log("teste");
                 await sleep(500); // opcional: só para simular delay
                 const raw = storeContract as unknown as { provider?: ContractProvider };
-                
 
-                if (!raw.provider) {
-                setError("Contrato não inicializado corretamente (sem provider).");
-                return;
-                }
-                const value:Item | null = await TactStore.getGetItem(raw.provider, itemId);
+                const value:Item | null = await TactStore.getGetItem((storeContract as any), itemId);
+                console.log("valor: ");
+                console.log(value);
                 if (value) {
                     setItemValue(value as Item);
                     console.log("Item carregado:", value);
