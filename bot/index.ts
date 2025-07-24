@@ -83,6 +83,11 @@ async function generatePaymentQR(address: string, amount: number): Promise<Buffe
   return await QRCode.toBuffer(tonUrl);
 }
 
+async function generatePaymentLink(address: string, amount: number): Promise<string> {
+  const tonUrl = `ton://transfer/${address}?amount=${amount * 10000000000}`; // TON usa nano-tons
+  return tonUrl;
+}
+
 // Função para salvar pedido no banco de dados
 async function saveOrderToDatabase(tempOrder: TempOrder): Promise<void> {
   try {
@@ -329,68 +334,84 @@ bot.on('callback_query', async (query) => {
       });
     }
 
-    else if (data.startsWith('buy_')) {
-      const productId = data.replace('buy_', '');
-      const product = await prisma.product.findUnique({ // Fetch product from DB
-        where: { id: productId }
-      });
+else if (data.startsWith('buy_')) {
+  const productId = data.replace('buy_', '');
+  const product = await prisma.product.findUnique({ // Fetch product from DB 
+    where: { id: productId }
+  });
 
-      if (!product) {
-        bot.sendMessage(chatId, 'Produto não encontrado.');
-        return;
-      }
+  
+  if (!product) {
+    bot.sendMessage(chatId, 'Produto não encontrado.');
+    return;
+  }
+ // ADD AQ 
+  const store = await prisma.lojas.findUnique({
+    where: { id: product.id_vendor }
+  });
 
-      // Create temporary order
-      const order: TempOrder = {
-        id: crypto.randomUUID(),
-        userId: query.from.id,
-        items: [{
-          productId: product.id,
-          productName: product.name,
-          quantity: 1,
-          price: product.price.toNumber() // Convert Decimal to number
-        }],
-        total: product.price.toNumber(), // Convert Decimal to number
-        status: 'pending',
-        paymentAddress: generateTonAddress(),
-        createdAt: new Date()
-      };
+  if (!store || !store.address) { 
+    bot.sendMessage(chatId, 'Não foi possível encontrar o endereço de pagamento da loja para este produto.');
+    return;
+  }
 
-      tempOrders.push(order);
+  // Create temporary order
+  const order: TempOrder = {
+    id: crypto.randomUUID(),
+    userId: query.from.id,
+    items: [{
+      productId: product.id,
+      productName: product.name,
+      quantity: 1,
+      price: product.price.toNumber() // Convert Decimal to number
+    }],
+    total: product.price.toNumber(), // Convert Decimal to number
+    status: 'pending',
+    paymentAddress: store.address, // MUDEI AQ 
+    createdAt: new Date()
+  };
 
-      // Gerar QR Code
-      const qrBuffer = await generatePaymentQR(order.paymentAddress!, order.total);
+  tempOrders.push(order);
 
-      const message = `
+  
+
+  // Gerar QR Code
+  const qrBuffer = await generatePaymentQR(order.paymentAddress!, order.total);
+  const tonUrl = await generatePaymentLink(order.paymentAddress!, order.total); // MUDEI AQ 
+  
+
+  const message = `
 🛒 **Pedido Criado!**
 📋 ID: ${order.id}
 💰 Total: ${order.total.toFixed(2)} tons
 
 📱 **Pagamento via TON:**
-Endereço: \`${order.paymentAddress}\`
+Endereço do Vendedor: \`${order.paymentAddress}\`
 Valor: ${order.total} TON
 
 Escaneie o QR Code abaixo para pagar:
-      `;
+  `;
 
-      const keyboard = {
-        inline_keyboard: [
-          [
-            { text: '✅ Confirmar Pagamento', callback_data: `confirm_payment_${order.id}` }
-          ],
-          [
-            { text: '❌ Cancelar Pedido', callback_data: `cancel_order_${order.id}` }
-          ]
-        ]
-      };
+  const keyboard = {
+    inline_keyboard: [
+      [
+        { text: '💰 Pagar com TON Wallet', url: tonUrl } // Botão com o deep link // MUDEI AQ 
+      ],
+      [
+        { text: '✅ Confirmar Pagamento', callback_data: `confirm_payment_${order.id}` }
+      ],
+      [
+        { text: '❌ Cancelar Pedido', callback_data: `cancel_order_${order.id}` }
+      ]
+    ]
+  };
 
-      bot.sendPhoto(chatId, qrBuffer, {
-        caption: message,
-        parse_mode: 'Markdown',
-        reply_markup: keyboard
-      });
-    }
-
+  bot.sendPhoto(chatId, qrBuffer, {
+    caption: message,
+    parse_mode: 'Markdown',
+    reply_markup: keyboard
+  });
+}
     else if (data.startsWith('confirm_payment_')) {
       const orderId = data.replace('confirm_payment_', '');
       const order = tempOrders.find(o => o.id === orderId);
