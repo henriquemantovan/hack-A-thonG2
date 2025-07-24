@@ -1,5 +1,11 @@
 # MarkeTON
 
+### Como acessar o projeto
+- Nome/link do nosso bot  do telegram [@PolichainG2bot](https://t.me/PolichainG2bot)
+- MiniApp deployado na vercel no link: https://marketon-rust.vercel.app/
+- Link do contrato deployado: https://testnet.tonviewer.com/EQBey5cqzRBkAe9fQu06zHRCvVuRLWS7KiCogOL7X32XJPdh
+
+
 ### Problema central
 
 O Telegram é uma plataforma dinâmica, com uma comunidade global em constante crescimento e um ecossistema de bots e miniApps cada vez mais sofisticado. Com a integração da blockchain TON, o ambiente está pronto para experiências Web3, mas ainda há espaço para soluções que tornem essa tecnologia acessível no dia a dia das pessoas.
