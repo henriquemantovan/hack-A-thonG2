@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import crypto from 'crypto';
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client'; // Import PrismaClient
+import { generateBuyItemLink } from './generateBuyItemLink';
 
 // Initialize Prisma Client
 const prisma = new PrismaClient();
@@ -198,7 +199,7 @@ bot.onText(/\/lojas/, async (msg) => {
       ])
     };
 
-    bot.sendMessage(chatId, '🏪 **Lojas Disponíveis:**', {
+    bot.sendMessage(chatId, '🏪 **Lojas Disponíveis: **', {
       parse_mode: 'Markdown',
       reply_markup: keyboard
     });
@@ -359,18 +360,21 @@ bot.on('callback_query', async (query) => {
       tempOrders.push(order);
 
       // Gerar QR Code
-      const qrBuffer = await generatePaymentQR(order.paymentAddress!, order.total);
+      const paymentlink = await generateBuyItemLink(Number(product.id), order.total)
 
+      const qrBuffer = await QRCode.toBuffer(paymentlink);
       const message = `
-🛒 **Pedido Criado!**
-📋 ID: ${order.id}
-💰 Total: ${order.total.toFixed(2)} tons
+      🛒 *Pedido Criado!*
+      📋 ID: ${(order.id)}
+      💰 Total: ${order.total.toFixed(2)} tons
 
-📱 **Pagamento via TON:**
-Endereço: \`${order.paymentAddress}\`
-Valor: ${order.total} TON
+      📱 *Pagamento via TON:*
+      Endereço: \`${(order.paymentAddress!)}\`
+      Valor: ${order.total} TON
 
-Escaneie o QR Code abaixo para pagar:
+      🔗 [Pagar com Tonkeeper](${paymentlink})
+
+      Escaneie o QR Code abaixo para pagar:
       `;
 
       const keyboard = {
