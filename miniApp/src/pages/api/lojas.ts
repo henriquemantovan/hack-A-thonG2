@@ -1,5 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
+import { useTonClient } from '../../hooks/useTonClient';
+import { useTonConnect } from '../../hooks/useTonConnect';
 
 const prisma = new PrismaClient();
 
@@ -15,9 +17,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'POST') {
-    const { id, first_name, nome_loja } = req.body;
+    const { id, first_name, nome_loja, address } = req.body;
+  
 
-    if (!id || !first_name || !nome_loja) {
+    if (!id || !first_name || !nome_loja || !address) {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
 
@@ -37,12 +40,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'PUT') {
-    const { id, first_name, nome_loja } = req.body;
+    const { id, first_name, nome_loja, address } = req.body;
 
     if (!id || !first_name || !nome_loja) {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
-
+    
     try {
       const lojaExistente = await prisma.lojas.findUnique({
         where: { id }

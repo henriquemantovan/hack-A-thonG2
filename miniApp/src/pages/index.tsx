@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { TelegramWebApp } from '../utils/telegram';
 import TonConnect from '@tonconnect/sdk';
 import { TonConnectButton } from '@tonconnect/ui-react';
+import { useTonConnect } from '../hooks/useTonConnect';
 
 declare global {
   interface Window {
@@ -108,13 +109,19 @@ const Home = () => {
   };
 
   // Cadastra uma nova loja
+
+  const { connected, wallet } = useTonConnect();
   const createStore = async () => {
     if (!storeName.trim() || !userData.userId) {
       alert('Por favor, digite o nome da loja');
       return;
     }
+    
+    if(!wallet){
+      alert('Conecte a sua wallet antes!');
+    }
 
-    setIsCreatingStore(true);
+      setIsCreatingStore(true);
 
     try {
       const response = await fetch('/api/lojas', {
@@ -125,7 +132,8 @@ const Home = () => {
         body: JSON.stringify({
           id: userData.userId,
           first_name: userData.firstName,
-          nome_loja: storeName.trim()
+          nome_loja: storeName.trim(),
+          address: wallet
         })
       });
 
